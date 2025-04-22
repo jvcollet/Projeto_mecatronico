@@ -1,35 +1,38 @@
-// Inclui as bibliotecas
 #include "mbed.h"
 #include "movimento.h"
+#include "referenciamento.h"
 
-
-// Instâncias globais
-BusOut MP1(D3, D4, D5, D6);
-BusOut MP2(D8, D9, D10, D11);
-
+BusOut    MP1(D3, D4, D5, D6);
+BusOut    MP2(D8, D9, D10, D11);
 DigitalOut Led(LED1);
-DigitalIn botao(PC_13);
-AnalogIn xAxis(A0);
-AnalogIn yAxis(A1);
+DigitalIn  botao(PC_13);
+AnalogIn   xAxis(A0);
+AnalogIn   yAxis(A1);
+
+// Sensores e posições vindos de referenciamento.cpp
+extern DigitalIn xMin, xMax, yMin, yMax;
+extern int x_posicao, y_posicao;
 
 int main() {
-    bool estado = 0;
-    int x_joystick, y_joystick;
+    bool estado = false;
 
-    Led = 0;
+    // 1) Executa homing para zerar as posições
+    referenciar();
 
-    while (1) {
-        x_joystick = xAxis.read() * 1000;
-        y_joystick = yAxis.read() * 1000;
+    // 2) Loop principal
+    while (true) {
+        int x_val = xAxis.read() * 1000;
+        int y_val = yAxis.read() * 1000;
 
-        printf("\nX=%4d\tY=%4d", x_joystick, y_joystick);
-        Led = estado;
+        printf("\nX=%4d  Y=%4d  Pos=(%d,%d)", 
+               x_val, y_val, x_posicao, y_posicao);
 
-        movimento_joystick(x_joystick, y_joystick);
+        movimento_joystick(x_val, y_val);
 
-        if (botao == 0) {
+        if (botao.read() == 0) {
             estado = !estado;
-            wait(0.3);
+            wait(0.3f);
         }
+        Led = estado;
     }
 }
