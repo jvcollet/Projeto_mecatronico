@@ -1,6 +1,6 @@
 #include "mbed.h"
 #include "movimento.h"
-#include "referenciamento.h"  // para acesso a x_posicao e y_posicao
+#include "referenciamento.h"  // para acesso a x_posicao; y_posicao;
 
 extern BusOut MP1;
 extern BusOut MP2;
@@ -8,6 +8,8 @@ extern DigitalIn xMin, xMax, yMin, yMax;
 extern int x_posicao, y_posicao;
 
 #define velo 0.01f
+#define MM_POR_STEP 4.0f    // passo do
+
 
 static const uint8_t STEP_PATTERN[4] = {1<<0,1<<1,1<<2,1<<3};
 
@@ -16,7 +18,7 @@ static void step_forward(BusOut& M, int& pos) {
         M = STEP_PATTERN[i];
         wait(velo);
     }
-    pos++;
+     pos += MM_POR_STEP;   // soma 4 mm
 }
 
 static void step_backward(BusOut& M, int& pos) {
@@ -24,7 +26,7 @@ static void step_backward(BusOut& M, int& pos) {
         M = STEP_PATTERN[i];
         wait(velo);
     }
-    pos--;
+     pos -= MM_POR_STEP;   // soma 4 mm
 }
 
 void movimento_joystick(int x_joystick, int y_joystick) {
