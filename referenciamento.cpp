@@ -16,8 +16,8 @@ int x_posicao = 0;           //  posição do X
 int y_posicao = 0;           //  posição do Y
 int z_posicao = 0;           //  posição do Z
 
-#define VELO_HOMING    0.01f
-#define BACKOFF_STEPS 10
+#define VELO_HOMING    0.01f      //velocidade a definir
+#define BACKOFF_STEPS 10          //parametro a definir
 
 static const uint8_t STEP_PATTERN[4] = {
     1<<0,  // fase 1

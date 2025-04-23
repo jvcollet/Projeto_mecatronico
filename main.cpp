@@ -4,14 +4,15 @@
 
 BusOut    MP1(D3, D4, D5, D6);
 BusOut    MP2(D8, D9, D10, D11);
+BusOut    MP3(D12, D13, D14, D15);
 DigitalOut Led(LED1);
 DigitalIn  botao(PC_13);
 AnalogIn   xAxis(A0);
 AnalogIn   yAxis(A1);
 
 // Sensores e posições vindos de referenciamento.cpp
-extern DigitalIn xMin, xMax, yMin, yMax;
-extern int x_posicao, y_posicao;
+extern DigitalIn xMin, xMax, yMin, yMax, zMin, zMax;
+extern int x_posicao, y_posicao, z_posicao;
 
 int main() {
     bool estado = false;
