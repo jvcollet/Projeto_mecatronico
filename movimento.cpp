@@ -8,7 +8,9 @@ extern DigitalIn xMin, xMax, yMin, yMax;
 extern int x_posicao, y_posicao;
 
 #define velo 0.01f
-#define MM_POR_STEP 4.0f    // passo do
+#define MM_POR_STEP 4.0f    // passo fuso
+#define PASSO_MOTOR 1.8f
+static const float MM_POR_PASSO = (PASSO_MOTOR * MM_POR_STEP) / 360.0f;  // mm por passo
 
 
 static const uint8_t STEP_PATTERN[4] = {1<<0,1<<1,1<<2,1<<3};
@@ -18,7 +20,7 @@ static void step_forward(BusOut& M, int& pos) {
         M = STEP_PATTERN[i];
         wait(velo);
     }
-     pos += MM_POR_STEP;   // soma 4 mm
+     pos += MM_POR_PASSO;   // Calcula a movimenta
 }
 
 static void step_backward(BusOut& M, int& pos) {
@@ -26,7 +28,7 @@ static void step_backward(BusOut& M, int& pos) {
         M = STEP_PATTERN[i];
         wait(velo);
     }
-     pos -= MM_POR_STEP;   // soma 4 mm
+     pos -= MM_POR_PASSO;   // soma 4 mm
 }
 
 void movimento_joystick(int x_joystick, int y_joystick) {
