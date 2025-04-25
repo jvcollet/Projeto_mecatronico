@@ -29,11 +29,5 @@ int main() {
                x_val, y_val, x_posicao, y_posicao);
 
         movimento_joystick(x_val, y_val);
-
-        if (botao.read() == 0) {
-            estado = !estado;
-            wait(0.3f);
-        }
-        Led = estado;
     }
 }
