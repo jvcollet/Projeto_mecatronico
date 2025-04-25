@@ -24,7 +24,7 @@ int main() {
 
     // 1) Executa homing para zerar as posições
     // Temos que adicionar um if se for clicado
-    referenciar();
+    // referenciar();
 
     // 2) Loop principal
     while (true) {
