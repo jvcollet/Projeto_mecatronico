@@ -2,71 +2,74 @@
 #include "movimento.h"
 #include "referenciamento.h"
 #include "nextion_interface.h"
-#include "controle_posicoes.h"   // NOVO: para salvar e executar posições
 
-BusOut    MP1(D3, D4, D5, D6);
-BusOut    MP2(D8, D9, D10, D11);
-BusOut    MP3(D12, D13, D14, D15);
+// Definições de drivers de passo para X e Y
+DigitalOut DIR_X(D6);
+DigitalOut CLK_X(D12);
+DigitalOut ENABLE_X(D5, 0); // enable ativo baixo
+DigitalOut DIR_Y(D7);
+DigitalOut CLK_Y(D11);
+DigitalOut ENABLE_Y(D4, 0); // enable ativo baixo
+
+// Motor Z via BusOut
+BusOut MP3(D12, D13, D14, D15);
+
+// Sensores de fim de curso
+DigitalIn xMin(D9);
+DigitalIn xMax(D10);
+DigitalIn yMin(D2);
+DigitalIn yMax(D3);
+DigitalIn zMin(D10);
+DigitalIn zMax(D11);
+
+// Contadores de passos
+int x_posicao = 0;
+int y_posicao = 0;
+int z_posicao = 0;
+
+// Controle geral
 DigitalOut Led(LED1);
-DigitalIn  emergencia(PC_14);  
 DigitalIn  botao(PC_13);
+DigitalIn  emergencia(PC_14);
 AnalogIn   xAxis(A0);
 AnalogIn   yAxis(A1);
-
-// Serial do Nextion
-Serial    nextion(PA_9, PA_10, 9600);
-
-// Sensores e posições vindos de referenciamento.cpp
-extern DigitalIn xMin, xMax, yMin, yMax, zMin, zMax;
-extern int x_posicao, y_posicao, z_posicao;
+Serial     nextion(PA_9, PA_10, 9600);
 
 int main() {
-    printf("\nSistema Iniciado.\n");
-    
-    // 1) Executa homing para zerar as posições (se quiser manual, com comando 'R')
-    // referenciar();
+    bool estado = false;
+    referenciar();
+    // while (true) {
+    //     // 1) Referenciamento via Nextion ('R')
+    //     if (nextion.readable() && nextion.getc() == 'R') {
+    //         printf("\nReferenciando...\n");
+    //         referenciar();
+    //     }
 
-    while (true) {
-        // -- BOTÃO DE EMERGÊNCIA --
-        if (emergencia.read() == 0) {
-            MP1 = MP2 = MP3 = 0;
-            Led = 0;
-            printf("\n!!! EMERGÊNCIA ATIVADA !!!\n");
-            while (emergencia.read() == 0) {
-                MP1 = MP2 = MP3 = 0;
-                Led = 0;
-                wait(0.2f);
-            }
-            printf("\nEmergência liberada. Executando novo referenciamento.\n");
-            referenciar();
-        }
+    //     // 2) Emergência (NR-12)
+    //     if (emergencia.read() == 0) {
+    //         // Desliga drivers X/Y e motor Z
+    //         ENABLE_X = 1;
+    //         ENABLE_Y = 1;
+    //         MP3 = 0;
+    //         Led = 0;
+    //         printf("\n!!! EMERGÊNCIA ATIVADA - Movimentos suspensos !!!\n");
+    //         while (emergencia.read() == 0) wait_ms(100);
+    //         printf("\nEmergência liberada, referenciando...\n");
+    //         referenciar();
+    //     }
 
-        // -- COMANDOS DO NEXTION --
-        if (nextion.readable()) {
-            char cmd = nextion.getc();
+    //     // 3) Controle manual por joystick
+    //     int xv = xAxis.read() * 1000;
+    //     int yv = yAxis.read() * 1000;
+    //     printf("\nX=%4d  Y=%4d  Pos=(%d,%d,%d)\r\n",
+    //            xv, yv, x_posicao, y_posicao, z_posicao);
+    //     movimento_joystick(xv, yv);
 
-            if (cmd == 'R') {   // Referenciar
-                printf("\nExecutando referenciamento...\n");
-                referenciar();
-            }
-            else if (cmd == 'C') {  // Salvar posição de coleta
-                salvar_posicao(x_posicao, y_posicao, z_posicao);
-            }
-            else if (cmd == 'D') {  // Salvar posição de dispensa (opcional, pode usar 'C' pra todos)
-                salvar_posicao(x_posicao, y_posicao, z_posicao);
-            }
-            else if (cmd == 'A') {  // Iniciar ciclo automático
-                executar_ciclo();
-            }
-        }
-
-        // -- CONTROLE MANUAL PELO JOYSTICK --
-        int x_val = xAxis.read() * 1000;
-        int y_val = yAxis.read() * 1000;
-
-        printf("\nJoystick - X: %4d  Y: %4d | Posição - (%d, %d)", 
-               x_val, y_val, x_posicao, y_posicao);
-
-        movimento_joystick(x_val, y_val);
-    }
+    //     // 4) Toggle LED via botão
+    //     if (botao.read() == 0) {
+    //         estado = !estado;
+    //         Led = estado;
+    //         wait(0.3f);
+    //     }
+    // }
 }

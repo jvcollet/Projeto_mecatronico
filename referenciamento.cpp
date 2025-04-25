@@ -1,24 +1,35 @@
+// referenciamento.cpp
 #include "mbed.h"
 #include "referenciamento.h"
 
-// Motores (definidos em main.cpp)
-extern BusOut MP1;           //  motor do eixo X
-extern BusOut MP2;           //  motor do eixo Y
-extern BusOut MP3;           //  motor do eixo Z
+// Drivers de passo definidos em main.cpp
+extern DigitalOut DIR_X;
+extern DigitalOut CLK_X;
+extern DigitalOut ENABLE_X;
+extern DigitalOut DIR_Y;
+extern DigitalOut CLK_Y;
+extern DigitalOut ENABLE_Y;
 
-// Sensores de limite
-DigitalIn xMin(D2), xMax(D13);   // sensores mínimos/máximos do X
-DigitalIn yMin(D7), yMax(D12);   // sensores mínimos/máximos do Y 
-DigitalIn zMin(D10), zMax(D11);  // sensores mínimos/máximos do Z
+// Motor Z via BusOut (definido em main.cpp)
+extern BusOut MP3;
 
-// Posições globais
-int x_posicao = 0;           //  posição do X
-int y_posicao = 0;           //  posição do Y
-int z_posicao = 0;           //  posição do Z
+// Sensores de limite (definidos em main.cpp)
+extern DigitalIn xMin;
+extern DigitalIn xMax;
+extern DigitalIn yMin;
+extern DigitalIn yMax;
+extern DigitalIn zMin;
+extern DigitalIn zMax;
 
-#define VELO_HOMING    0.01f      //velocidade a definir
-#define BACKOFF_STEPS 10          //parametro a definir
+// Contadores de passos acumulados (definidos em referenciamento.h)
+extern int x_posicao;
+extern int y_posicao;
+extern int z_posicao;
 
+#define VELO_HOMING    0.001f   // meio período de pulso (s)
+#define BACKOFF_STEPS 10        // passos de back-off pós homing
+
+// Padrão de fases para motor unipolar/stepper
 static const uint8_t STEP_PATTERN[4] = {
     1<<0,  // fase 1
     1<<1,  // fase 2
@@ -26,17 +37,53 @@ static const uint8_t STEP_PATTERN[4] = {
     1<<3   // fase 4
 };
 
-static void step_forward(BusOut& M, int& pos) {
+// Pulso único para drivers de passo (X e Y)
+static void pulso_step(DigitalOut &CLK) {
+    CLK = 1;
+    wait(VELO_HOMING);
+    CLK = 0;
+    wait(VELO_HOMING);
+}
+
+// Eixo X
+static void step_forward_x(int &pos) {
+    DIR_X    = 1;
+    ENABLE_X = 0;    // habilita driver (ativo baixo)
+    pulso_step(CLK_X);
+    pos++;
+}
+static void step_backward_x(int &pos) {
+    DIR_X    = 0;
+    ENABLE_X = 0;
+    pulso_step(CLK_X);
+    pos--;
+}
+
+// Eixo Y
+static void step_forward_y(int &pos) {
+    DIR_Y    = 1;
+    ENABLE_Y = 0;
+    pulso_step(CLK_Y);
+    pos++;
+}
+static void step_backward_y(int &pos) {
+    DIR_Y    = 0;
+    ENABLE_Y = 0;
+    pulso_step(CLK_Y);
+    pos--;
+}
+
+// Eixo Z (BusOut, padrão antigo)
+static void step_forward_z(int &pos) {
     for (int i = 0; i < 4; i++) {
-        M = STEP_PATTERN[i];
+        MP3 = STEP_PATTERN[i];
         wait(VELO_HOMING);
     }
     pos++;
 }
-
-static void step_backward(BusOut& M, int& pos) {
+static void step_backward_z(int &pos) {
     for (int i = 3; i >= 0; i--) {
-        M = STEP_PATTERN[i];
+        MP3 = STEP_PATTERN[i];
         wait(VELO_HOMING);
     }
     pos--;
@@ -45,29 +92,28 @@ static void step_backward(BusOut& M, int& pos) {
 void referenciar() {
     // Homing eixo X (mínimo)
     while (xMin.read() == 1) {
-        step_backward(MP1, x_posicao);
+        step_backward_x(x_posicao);
     }
-    // Back-off
     for (int i = 0; i < BACKOFF_STEPS; i++) {
-        step_forward(MP1, x_posicao);
+        step_forward_x(x_posicao);
     }
     x_posicao = 0;
 
     // Homing eixo Y (mínimo)
     while (yMin.read() == 1) {
-        step_backward(MP2, y_posicao);
+        step_backward_y(y_posicao);
     }
     for (int i = 0; i < BACKOFF_STEPS; i++) {
-        step_forward(MP2, y_posicao);
+        step_forward_y(y_posicao);
     }
     y_posicao = 0;
 
     // Homing eixo Z (mínimo)
     while (zMin.read() == 1) {
-        step_backward(MP3, z_posicao);
+        step_backward_z(z_posicao);
     }
     for (int i = 0; i < BACKOFF_STEPS; i++) {
-        step_forward(MP3, z_posicao);
+        step_forward_z(z_posicao);
     }
     z_posicao = 0;
 }
