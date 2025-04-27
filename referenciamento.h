@@ -4,13 +4,7 @@
 #include "mbed.h"
 
 // Protótipo da função de homing
-typedef void (*ReferenciarFunc)(void);
 void referenciar(void);
-
-// Variáveis de posição (passos acumulados)
-extern int x_posicao;
-extern int y_posicao;
-extern int z_posicao;
 
 // Sensores de fim de curso (definidos em main.cpp)
 extern DigitalIn xMin;
@@ -20,15 +14,14 @@ extern DigitalIn yMax;
 extern DigitalIn zMin;
 extern DigitalIn zMax;
 
-// Drivers de passo para X e Y (definidos em main.cpp)
-extern DigitalOut DIR_X;
-extern DigitalOut CLK_X;
-extern DigitalOut ENABLE_X;
-extern DigitalOut DIR_Y;
-extern DigitalOut CLK_Y;
-extern DigitalOut ENABLE_Y;
+// Contadores de passos acumulados (definidos em main.cpp)
+extern int x_posicao;
+extern int y_posicao;
+extern int z_posicao;
 
-// Motor Z via BusOut (definido em main.cpp)
-extern BusOut MP3;
+// Funções de passo unificadas (definidas em movimento.cpp)
+void step_x(int direction, int &pos);
+void step_y(int direction, int &pos);
+void step_z(int direction, int &pos);
 
 #endif // REFERENCIAMENTO_H

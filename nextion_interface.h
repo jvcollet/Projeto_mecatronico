@@ -3,7 +3,7 @@
 
 #include "mbed.h"
 
-// Declaração da porta serial usada para comunicação com o display Nextion
+// Declaração do objeto externo
 extern Serial nextion;
 
 #endif // NEXTION_INTERFACE_H
