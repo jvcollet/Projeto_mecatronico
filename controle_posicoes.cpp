@@ -1,49 +1,57 @@
-// // controle_posicoes.cpp
+// controle_posicoes.cpp
+#include "mbed.h"
+#include "controle_posicoes.h"
 
-// #include "mbed.h"
-// #include "controle_posicoes.h"
-// #include "movimento.h"      // Para step_forward, step_backward
-// #include "referenciamento.h" // Para acesso à posição global
+// Variáveis de posição globais definidas em main.cpp
+extern int x_posicao;
+extern int y_posicao;
+extern int z_posicao;
 
-// extern BusOut MP1;
-// extern BusOut MP2;
-// extern BusOut MP3;
+// Lista de posições salvas
+static Posicao posicoes[MAX_POSICOES];
+static int total_posicoes = 0;
 
-// extern int x_posicao, y_posicao, z_posicao;
+// Salva uma nova posição (x, y, z)
+void salvar_posicao(float x_atual, float y_atual, float z_atual) {
+    if (total_posicoes < MAX_POSICOES) {
+        posicoes[total_posicoes].x = x_atual;
+        posicoes[total_posicoes].y = y_atual;
+        posicoes[total_posicoes].z = z_atual;
+        printf("\nPosição %d salva: (%.2f, %.2f, %.2f)\n",
+               total_posicoes,
+               posicoes[total_posicoes].x,
+               posicoes[total_posicoes].y,
+               posicoes[total_posicoes].z);
+        total_posicoes++;
+    } else {
+        printf("\nLimite máximo de posições atingido!\n");
+    }
+}
 
-// // Lista de posições salvas
-// Posicao posicoes[MAX_POSICOES];
-// int total_posicoes = 0;
+// Função auxiliar: move os eixos até posição alvo (tolerância ±1)
+static void mover_para_posicao(const Posicao &alvo) {
+    // Eixo X
+    while (x_posicao < alvo.x - 1.0f) step_x(+1, x_posicao);
+    while (x_posicao > alvo.x + 1.0f) step_x(-1, x_posicao);
+    // Eixo Y
+    while (y_posicao < alvo.y - 1.0f) step_y(+1, y_posicao);
+    while (y_posicao > alvo.y + 1.0f) step_y(-1, y_posicao);
+    // Eixo Z
+    while (z_posicao < alvo.z - 1.0f) step_z(+1, z_posicao);
+    while (z_posicao > alvo.z + 1.0f) step_z(-1, z_posicao);
+}
 
-// // Função para salvar uma nova posição
-// void salvar_posicao(float x_atual, float y_atual, float z_atual) {
-//     if (total_posicoes < MAX_POSICOES) {
-//         posicoes[total_posicoes].x = x_atual;
-//         posicoes[total_posicoes].y = y_atual;
-//         posicoes[total_posicoes].z = z_atual;
-//         printf("\nPosição %d salva: (%.2f, %.2f, %.2f)\n", total_posicoes, x_atual, y_atual, z_atual);
-//         total_posicoes++;
-//     } else {
-//         printf("\nLimite máximo de posições atingido!\n");
-//     }
-// }
-
-// // Função para mover para uma posição específica
-// void mover_para_posicao(float alvo_x, float alvo_y) {
-//     while (x_posicao < alvo_x - 1) { step_forward(MP1, x_posicao); }
-//     while (x_posicao > alvo_x + 1) { step_backward(MP1, x_posicao); }
-//     while (y_posicao < alvo_y - 1) { step_forward(MP2, y_posicao); }
-//     while (y_posicao > alvo_y + 1) { step_backward(MP2, y_posicao); }
-//     // Eixo Z você pode melhorar depois: para descer/coletar e subir
-// }
-
-// // Executa ciclo completo: passa por todas as posições salvas
-// void executar_ciclo() {
-//     printf("\nIniciando ciclo automático...\n");
-//     for (int i = 0; i < total_posicoes; i++) {
-//         printf("\nMovendo para posição %d\n", i);
-//         mover_para_posicao(posicoes[i].x, posicoes[i].y);
-//         wait(1.5);  // Tempo simulado de coleta/dispensa
-//     }
-//     printf("\nCiclo automático finalizado.\n");
-// }
+// Executa ciclo completo: passa por todas as posições salvas
+void executar_ciclo(void) {
+    printf("\nIniciando ciclo automático...\n");
+    for (int i = 0; i < total_posicoes; ++i) {
+        printf("\nMovendo para posição %d: (%.2f, %.2f, %.2f)\n",
+               i,
+               posicoes[i].x,
+               posicoes[i].y,
+               posicoes[i].z);
+        mover_para_posicao(posicoes[i]);
+        wait(1.5f);  // tempo de coleta/dispensa
+    }
+    printf("\nCiclo automático finalizado.\n");
+}
