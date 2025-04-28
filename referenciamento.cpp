@@ -14,30 +14,49 @@ extern int       x_posicao, y_posicao, z_posicao;
 #define BACKOFF_STEPS 10
 
 void referenciar() {
-    // Homing X
-    while (xMin.read() == 1) {
-        step_x(-1, x_posicao);
-    }
-    for (int i = 0; i < BACKOFF_STEPS; ++i) {
-        step_x(+1, x_posicao);
-    }
-    x_posicao = 0;
+    bool x_ref_ok = false;
+    bool y_ref_ok = false;
+    bool z_ref_ok = false;
 
-    // Homing Y
-    while (yMin.read() == 1) {
-        step_y(-1, y_posicao);
-    }
-    for (int i = 0; i < BACKOFF_STEPS; ++i) {
-        step_y(+1, y_posicao);
-    }
-    y_posicao = 0;
+    while (!(x_ref_ok)) {  // Enquanto nem todos referenciados
+        // Movimento eixo X
+        if (!x_ref_ok) {
+            if (xMax.read() == 1) {  // Sensor NÃO acionado
+                step_x(1, x_posicao);
+            } else {  // Sensor ACIONADO
+                // FAZ O BACKOFF IMEDIATAMENTE
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                    step_x(-1, x_posicao); // Recuo no sentido contrário
+                }
+                x_posicao = 0;
+                x_ref_ok = true;  // Agora marcou como referenciado
+            }
+        }
 
-    // Homing Z
-    while (zMin.read() == 1) {
-        step_z(-1, z_posicao);
+        // Movimento eixo Y
+        if (!y_ref_ok) {
+            if (yMax.read() == 1) {  // Sensor NÃO acionado
+                step_y(1, y_posicao);
+            } else {  // Sensor ACIONADO
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                    step_y(-1, y_posicao);
+                }
+                y_posicao = 0;
+                y_ref_ok = true;
+            }
+        }
+
+        // Movimento eixo Z
+        if (!z_ref_ok) {
+            if (zMax.read() == 1) {  // Sensor NÃO acionado
+                step_z(1, z_posicao);
+            } else {  // Sensor ACIONADO
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                    step_z(-1, z_posicao);
+                }
+                z_posicao = 0;
+                z_ref_ok = true;
+            }
+        }
     }
-    for (int i = 0; i < BACKOFF_STEPS; ++i) {
-        step_z(+1, z_posicao);
-    }
-    z_posicao = 0;
 }

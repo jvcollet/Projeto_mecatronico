@@ -18,8 +18,8 @@ DigitalOut ENABLE_Y(D4, 0);  // enable ativo baixo
 BusOut MP3(D12, D13, D14, D15);
 
 // Sensores de fim de curso
-DigitalIn xMin(D9);
-DigitalIn xMax(D10);
+DigitalIn xMin(D10);
+DigitalIn xMax(D9);
 DigitalIn yMin(D2);
 DigitalIn yMax(D3);
 DigitalIn zMin(D10);
