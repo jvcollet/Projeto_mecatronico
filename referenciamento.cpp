@@ -14,23 +14,18 @@ extern int       x_posicao, y_posicao, z_posicao;
 #define BACKOFF_STEPS 10
 
 void referenciar() {
-    bool x_ref_ok = false;
-    bool y_ref_ok = false;
-    bool z_ref_ok = false;
+    bool x_ref_ok = false, y_ref_ok = false, z_ref_ok = false;
 
-    // roda até X, Y e Z estarem referenciados
     while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
-
         // — EIXO X —
         if (!x_ref_ok) {
-            if (xMin.read() == 1) {
-                // anda negativo até tocar o fim de curso min
-                step_x(-1, x_posicao);
+            // troquei para usar xMax (fim de curso “positivo”) só como exemplo
+            if (xMax.read() == 1) {
+                step_x(+1, x_posicao);   // agora caminha “positivo” até encostar
             } else {
-                // back‐off assim que tocar
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_x(+1, x_posicao);
-                }
+                // back-off no sentido contrário
+                for (int i = 0; i < BACKOFF_STEPS; ++i)
+                    step_x(-1, x_posicao);
                 x_posicao = 0;
                 x_ref_ok  = true;
             }
@@ -38,12 +33,11 @@ void referenciar() {
 
         // — EIXO Y —
         if (!y_ref_ok) {
-            if (yMin.read() == 1) {
-                step_y(-1, y_posicao);
+            if (yMax.read() == 1) {
+                step_y(+1, y_posicao);
             } else {
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_y(+1, y_posicao);
-                }
+                for (int i = 0; i < BACKOFF_STEPS; ++i)
+                    step_y(-1, y_posicao);
                 y_posicao = 0;
                 y_ref_ok  = true;
             }
@@ -51,12 +45,11 @@ void referenciar() {
 
         // — EIXO Z —
         if (!z_ref_ok) {
-            if (zMin.read() == 1) {
-                step_z(-1, z_posicao);
+            if (zMax.read() == 1) {
+                step_z(+1, z_posicao);
             } else {
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_z(+1, z_posicao);
-                }
+                for (int i = 0; i < BACKOFF_STEPS; ++i)
+                    step_z(-1, z_posicao);
                 z_posicao = 0;
                 z_ref_ok  = true;
             }
