@@ -18,44 +18,62 @@ void referenciar() {
     bool y_ref_ok = false;
     bool z_ref_ok = false;
 
-    while (!(x_ref_ok)) {  // Enquanto nem todos referenciados
-        // Movimento eixo X
+    while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
+        // ——— Homing X ———
         if (!x_ref_ok) {
-            if (xMax.read() == 1) {  // Sensor NÃO acionado
-                step_x(1, x_posicao);
-            } else {  // Sensor ACIONADO
-                // FAZ O BACKOFF IMEDIATAMENTE
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_x(-1, x_posicao); // Recuo no sentido contrário
+            if (xMax.read() == 0) {
+                // ainda não bateu no limite → avança um passo
+                step_x(+1, x_posicao);
+            } else {
+                // debounce e garante leitura estável
+                wait_ms(50);
+                if (xMax.read() == 1) {
+                    // back-off com espaçamento de 20ms entre passos
+                    for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                        step_x(-1, x_posicao);
+                        wait_ms(20);
+                    }
+                    // pausa para estabilizar antes de zerar
+                    wait_ms(100);
+                    x_posicao = 0;
+                    x_ref_ok  = true;
                 }
-                x_posicao = 0;
-                x_ref_ok = true;  // Agora marcou como referenciado
             }
         }
 
-        // Movimento eixo Y
+        // ——— Homing Y ———
         if (!y_ref_ok) {
-            if (yMax.read() == 1) {  // Sensor NÃO acionado
-                step_y(1, y_posicao);
-            } else {  // Sensor ACIONADO
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_y(-1, y_posicao);
+            if (yMax.read() == 0) {
+                step_y(+1, y_posicao);
+            } else {
+                wait_ms(50);
+                if (yMax.read() == 1) {
+                    for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                        step_y(-1, y_posicao);
+                        wait_ms(20);
+                    }
+                    wait_ms(100);
+                    y_posicao = 0;
+                    y_ref_ok  = true;
                 }
-                y_posicao = 0;
-                y_ref_ok = true;
             }
         }
 
-        // Movimento eixo Z
+        // ——— Homing Z ———
         if (!z_ref_ok) {
-            if (zMax.read() == 1) {  // Sensor NÃO acionado
-                step_z(1, z_posicao);
-            } else {  // Sensor ACIONADO
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_z(-1, z_posicao);
+            if (zMax.read() == 0) {
+                step_z(+1, z_posicao);
+            } else {
+                wait_ms(50);
+                if (zMax.read() == 1) {
+                    for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                        step_z(-1, z_posicao);
+                        wait_ms(20);
+                    }
+                    wait_ms(100);
+                    z_posicao = 0;
+                    z_ref_ok  = true;
                 }
-                z_posicao = 0;
-                z_ref_ok = true;
             }
         }
     }

@@ -5,14 +5,13 @@
 #include "controle_posicoes.h"
 #include "nextion_interface.h"
 
-// === Definições de Hardware ===
 // Drivers de passo para X e Y
-DigitalOut DIR_X(D6);
-DigitalOut CLK_X(D12);
-DigitalOut ENABLE_X(D5, 0);  // enable ativo baixo
-DigitalOut DIR_Y(D7);
-DigitalOut CLK_Y(D11);
-DigitalOut ENABLE_Y(D4, 0);  // enable ativo baixo
+DigitalOut DIR_X(D7);
+DigitalOut CLK_X(D11);
+DigitalOut ENABLE_X(D4, 0);  // enable ativo baixo
+DigitalOut DIR_Y(D6);
+DigitalOut CLK_Y(D12);
+DigitalOut ENABLE_Y(D5, 0);  // enable ativo baixo
 
 // Motor Z via BusOut
 BusOut MP3(D12, D13, D14, D15);
