@@ -1,8 +1,8 @@
-// controle_posicoes.cpp
+// === controle_posicoes.cpp ===
 #include "mbed.h"
 #include "controle_posicoes.h"
 
-// Variáveis de posição globais definidas em main.cpp
+// Variáveis de posição globais
 extern int x_posicao;
 extern int y_posicao;
 extern int z_posicao;
@@ -11,7 +11,7 @@ extern int z_posicao;
 static Posicao posicoes[MAX_POSICOES];
 static int total_posicoes = 0;
 
-// Salva uma nova posição (x, y, z)
+// Salva uma nova posição
 void salvar_posicao(float x_atual, float y_atual, float z_atual) {
     if (total_posicoes < MAX_POSICOES) {
         posicoes[total_posicoes].x = x_atual;
@@ -28,20 +28,29 @@ void salvar_posicao(float x_atual, float y_atual, float z_atual) {
     }
 }
 
-// Função auxiliar: move os eixos até posição alvo (tolerância ±1)
+// NOVA função auxiliar: move com segurança
 static void mover_para_posicao(const Posicao &alvo) {
-    // Eixo X
+    // 1. Primeiro, sobe o eixo Z até o máximo (enquanto o sensor não detectar)
+    printf("\nSubindo Z até o máximo...\n");
+    while (zMax.read() == 1) {
+        step_z(+1, z_posicao);
+    }
+
+    // 2. Move os eixos X e Y até a posição alvo
+    printf("Movendo X e Y até posição desejada...\n");
     while (x_posicao < alvo.x - 1.0f) step_x(+1, x_posicao);
     while (x_posicao > alvo.x + 1.0f) step_x(-1, x_posicao);
-    // Eixo Y
+
     while (y_posicao < alvo.y - 1.0f) step_y(+1, y_posicao);
     while (y_posicao > alvo.y + 1.0f) step_y(-1, y_posicao);
-    // Eixo Z
+
+    // 3. Desce o eixo Z até a posição alvo
+    printf("Descendo Z até posição desejada...\n");
     while (z_posicao < alvo.z - 1.0f) step_z(+1, z_posicao);
     while (z_posicao > alvo.z + 1.0f) step_z(-1, z_posicao);
 }
 
-// Executa ciclo completo: passa por todas as posições salvas
+// Executa ciclo completo
 void executar_ciclo(void) {
     printf("\nIniciando ciclo automático...\n");
     for (int i = 0; i < total_posicoes; ++i) {
