@@ -40,14 +40,26 @@ AnalogIn   yAxis(A1);
 extern Serial nextion;
 
 int main() {
+
+     // ------------------------------------------------
+    // A) Ativa pull-ups internos nos sensores (estabiliza leitura)
+    // ------------------------------------------------
+
+    xMin.mode(PullUp);  xMax.mode(PullUp);
+    yMin.mode(PullUp);  yMax.mode(PullUp);
+    zMin.mode(PullUp);  zMax.mode(PullUp);
+
+    // 1) Referenciamento inicial
+    referenciar();
+    Led = 1;  // LED indica que estamos prontos
+
+
     bool modo_manual = true;  // Controle se estamos em modo de movimentação manual
     int contador_posicoes = 0;
 
     printf("\n=== Sistema Iniciado ===\n");
 
-    // 1) Referenciamento inicial
-    referenciar();
-    Led = 1;  // LED indica que estamos prontos
+
 
     // 2) Posicionar e salvar locais de coleta e dispensação
     printf("\n>> Posicione a pipeta na posição de COLETA usando o joystick.\n");
