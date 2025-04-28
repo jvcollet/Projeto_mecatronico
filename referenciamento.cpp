@@ -2,12 +2,12 @@
 #include "mbed.h"
 #include "referenciamento.h"
 
-// Seleciona as funções de passo exportadas
+// funções de passo
 extern void step_x(int direction, int &pos);
 extern void step_y(int direction, int &pos);
 extern void step_z(int direction, int &pos);
 
-// Sensores e variáveis em main.cpp
+// sensores e posições
 extern DigitalIn xMin, xMax, yMin, yMax, zMin, zMax;
 extern int       x_posicao, y_posicao, z_posicao;
 
@@ -18,62 +18,47 @@ void referenciar() {
     bool y_ref_ok = false;
     bool z_ref_ok = false;
 
+    // roda até X, Y e Z estarem referenciados
     while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
-        // ——— Homing X ———
+
+        // — EIXO X —
         if (!x_ref_ok) {
-            if (xMax.read() == 0) {
-                // ainda não bateu no limite → avança um passo
-                step_x(+1, x_posicao);
+            if (xMin.read() == 1) {
+                // anda negativo até tocar o fim de curso min
+                step_x(-1, x_posicao);
             } else {
-                // debounce e garante leitura estável
-                wait_ms(50);
-                if (xMax.read() == 1) {
-                    // back-off com espaçamento de 20ms entre passos
-                    for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                        step_x(-1, x_posicao);
-                        wait_ms(20);
-                    }
-                    // pausa para estabilizar antes de zerar
-                    wait_ms(100);
-                    x_posicao = 0;
-                    x_ref_ok  = true;
+                // back‐off assim que tocar
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                    step_x(+1, x_posicao);
                 }
+                x_posicao = 0;
+                x_ref_ok  = true;
             }
         }
 
-        // ——— Homing Y ———
+        // — EIXO Y —
         if (!y_ref_ok) {
-            if (yMax.read() == 0) {
-                step_y(+1, y_posicao);
+            if (yMin.read() == 1) {
+                step_y(-1, y_posicao);
             } else {
-                wait_ms(50);
-                if (yMax.read() == 1) {
-                    for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                        step_y(-1, y_posicao);
-                        wait_ms(20);
-                    }
-                    wait_ms(100);
-                    y_posicao = 0;
-                    y_ref_ok  = true;
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                    step_y(+1, y_posicao);
                 }
+                y_posicao = 0;
+                y_ref_ok  = true;
             }
         }
 
-        // ——— Homing Z ———
+        // — EIXO Z —
         if (!z_ref_ok) {
-            if (zMax.read() == 0) {
-                step_z(+1, z_posicao);
+            if (zMin.read() == 1) {
+                step_z(-1, z_posicao);
             } else {
-                wait_ms(50);
-                if (zMax.read() == 1) {
-                    for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                        step_z(-1, z_posicao);
-                        wait_ms(20);
-                    }
-                    wait_ms(100);
-                    z_posicao = 0;
-                    z_ref_ok  = true;
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
+                    step_z(+1, z_posicao);
                 }
+                z_posicao = 0;
+                z_ref_ok  = true;
             }
         }
     }

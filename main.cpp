@@ -14,15 +14,15 @@ DigitalOut CLK_Y(D12);
 DigitalOut ENABLE_Y(D5, 0);  // enable ativo baixo
 
 // Motor Z via BusOut
-BusOut MP3(D12, D13, D14, D15);
+//BusOut MP3(D12, D13, D14, D15);
 
 // Sensores de fim de curso
 DigitalIn xMin(D10);
 DigitalIn xMax(D9);
 DigitalIn yMin(D2);
 DigitalIn yMax(D3);
-DigitalIn zMin(D10);
-DigitalIn zMax(D11);
+//DigitalIn zMin(D10);
+//DigitalIn zMax(D11);
 
 // Contadores de posição
 int x_posicao = 0;
