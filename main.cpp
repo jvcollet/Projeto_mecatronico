@@ -65,7 +65,7 @@ int main() {
     printf("\n>> Posicione a pipeta na posição de COLETA usando o joystick.\n");
     printf(">> Pressione o botão para salvar a posição de coleta.\n");
 
-    while (contador_posicoes == 0) {
+    while (true) {
         // Leitura do joystick
         int xv = xAxis.read() * 1000;
         int yv = yAxis.read() * 1000;

@@ -4,7 +4,6 @@
 #include "referenciamento.h"  
 #include "nextion_interface.h"
 
-// — externs que antes estavam errados —  
 extern DigitalOut DIR_X;
 extern DigitalOut CLK_X;
 extern DigitalOut ENABLE_X;
