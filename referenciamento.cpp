@@ -11,47 +11,80 @@ extern void step_z(int direction, int &pos);
 extern DigitalIn xMin, xMax, yMin, yMax, zMin, zMax;
 extern int       x_posicao, y_posicao, z_posicao;
 
-#define BACKOFF_STEPS 10
+#define BACKOFF_STEPS 700
+#define STEP_DELAY_US 650
+#define WAIT_BACKOFF_MS 2000
+
+Timer timer_x;
+Timer timer_y;
+Timer timer_z;
 
 void referenciar() {
     bool x_ref_ok = false, y_ref_ok = false, z_ref_ok = false;
+    bool x_backoff_pending = false, y_backoff_pending = false, z_backoff_pending = false;
+
+    timer_x.start();
+    timer_y.start();
+    timer_z.start();
 
     while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
         // — EIXO X —
         if (!x_ref_ok) {
-            // troquei para usar xMax (fim de curso “positivo”) só como exemplo
-            if (xMax.read() == 1) {
-                step_x(+1, x_posicao);   // agora caminha “positivo” até encostar
-            } else {
-                // back-off no sentido contrário
-                for (int i = 0; i < BACKOFF_STEPS; ++i)
+            if (!x_backoff_pending) {
+                if (xMax.read() == 1) {
+                    step_x(+1, x_posicao);
+                    wait_us(STEP_DELAY_US);
+                } else {
+                    x_backoff_pending = true;
+                    timer_x.reset();  // inicia temporizador X
+                }
+            } else if (timer_x.read_ms() >= WAIT_BACKOFF_MS) {
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
                     step_x(-1, x_posicao);
+                    wait_us(STEP_DELAY_US);
+                }
                 x_posicao = 0;
-                x_ref_ok  = true;
+                x_ref_ok = true;
             }
         }
 
         // — EIXO Y —
         if (!y_ref_ok) {
-            if (yMax.read() == 1) {
-                step_y(+1, y_posicao);
-            } else {
-                for (int i = 0; i < BACKOFF_STEPS; ++i)
+            if (!y_backoff_pending) {
+                if (yMax.read() == 1) {
+                    step_y(+1, y_posicao);
+                    wait_us(STEP_DELAY_US);
+                } else {
+                    y_backoff_pending = true;
+                    timer_y.reset();  // inicia temporizador Y
+                }
+            } else if (timer_y.read_ms() >= WAIT_BACKOFF_MS) {
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
                     step_y(-1, y_posicao);
+                    wait_us(STEP_DELAY_US);
+                }
                 y_posicao = 0;
-                y_ref_ok  = true;
+                y_ref_ok = true;
             }
         }
 
         // — EIXO Z —
         if (!z_ref_ok) {
-            if (zMax.read() == 1) {
-                step_z(+1, z_posicao);
-            } else {
-                for (int i = 0; i < BACKOFF_STEPS; ++i)
+            if (!z_backoff_pending) {
+                if (zMax.read() == 1) {
+                    step_z(+1, z_posicao);
+                    wait_us(STEP_DELAY_US);
+                } else {
+                    z_backoff_pending = true;
+                    timer_z.reset();  // inicia temporizador Z
+                }
+            } else if (timer_z.read_ms() >= WAIT_BACKOFF_MS) {
+                for (int i = 0; i < BACKOFF_STEPS; ++i) {
                     step_z(-1, z_posicao);
+                    wait_us(STEP_DELAY_US);
+                }
                 z_posicao = 0;
-                z_ref_ok  = true;
+                z_ref_ok = true;
             }
         }
     }

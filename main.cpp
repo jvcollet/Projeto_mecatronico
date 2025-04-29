@@ -18,9 +18,9 @@ BusOut MP3(D13, D14, D15, D15);
 
 // Sensores de fim de curso
 DigitalIn xMin(D10);
-DigitalIn xMax(D9);
+DigitalIn xMax(D3);
 DigitalIn yMin(D2);
-DigitalIn yMax(D3);
+DigitalIn yMax(D9);
 DigitalIn zMin(D0);
 DigitalIn zMax(D1);
 

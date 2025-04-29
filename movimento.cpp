@@ -24,15 +24,15 @@ extern int x_posicao;
 extern int y_posicao;
 extern int z_posicao;
 
-#define VELO_HOMING    0.001f   // meio período de pulso (s)
+#define VELO_HOMING    250   // meio período de pulso (s)
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
 
 // Gera pulso de passo para drivers X e Y
 static void pulso_step(DigitalOut &CLK) {
     CLK = 1;
-    wait(VELO_HOMING);
+    wait_us(VELO_HOMING);
     CLK = 0;
-    wait(VELO_HOMING);
+    wait_us(VELO_HOMING);
 }
 
 // Funções de passo exportadas
@@ -54,13 +54,13 @@ void step_z(int direction, int &pos) {
     if (direction > 0) {
         for (int i = 0; i < 4; ++i) {
             MP3 = STEP_PATTERN[i];
-            wait(VELO_HOMING);
+            wait_us(VELO_HOMING);
         }
         pos++;
     } else {
         for (int i = 3; i >= 0; --i) {
             MP3 = STEP_PATTERN[i];
-            wait(VELO_HOMING);
+            wait_us(VELO_HOMING);
         }
         pos--;
     }
