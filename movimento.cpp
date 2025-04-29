@@ -23,7 +23,7 @@ extern int x_posicao;
 extern int y_posicao;
 extern int z_posicao;
 
-#define VELO_HOMING    250   // meio período de pulso (s)
+#define VELO_HOMING    500   // meio período de pulso (s)
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
 
 // Gera pulso de passo para drivers X e Y
