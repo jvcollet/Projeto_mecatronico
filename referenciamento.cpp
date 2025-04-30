@@ -11,9 +11,9 @@ extern void step_z(int direction, int &pos);
 extern DigitalIn xMin, xMax, yMin, yMax, zMin, zMax;
 extern int       x_posicao, y_posicao, z_posicao;
 
-#define BACKOFF_STEPS 700
-#define STEP_DELAY_US 650
-#define WAIT_BACKOFF_MS 2000
+#define BACKOFF_STEPS 2000
+#define STEP_DELAY_US 200
+#define WAIT_BACKOFF_MS 1000
 
 Timer timer_x;
 Timer timer_y;

@@ -23,8 +23,15 @@ extern int x_posicao;
 extern int y_posicao;
 extern int z_posicao;
 
-#define VELO_HOMING    500   // meio período de pulso (s)
+#define VELO_HOMING    200   // meio período de pulso (s)
+int x_posicao_max = 1600;  // passos até o outro fim de curso
+int y_posicao_max = 1600;  // passos até o outro fim de curso
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
+
+bool pode_ir_x_positivo = (x_posicao < x_posicao_max);
+bool pode_ir_x_negativo = (x_posicao > 0);
+bool pode_ir_y_positivo = (y_posicao < y_posicao_max);
+bool pode_ir_y_negativo = (y_posicao > 0);
 
 // Gera pulso de passo para drivers X e Y
 static void pulso_step(DigitalOut &CLK) {
@@ -70,11 +77,11 @@ void movimento_manual(int x_joystick, int y_joystick, bool manual) {
     // Não executa o código se for falso
     if (!manual) return;
     // X e Y pelo joystick
-    if (x_joystick > 550 && xMax.read()) step_x(+1, x_posicao);
-    else if (x_joystick < 450 && xMin.read()) step_x(-1, x_posicao);
+    if (x_joystick > 550 && pode_ir_x_positivo) step_x(+1, x_posicao);
+    else if (x_joystick < 450 && pode_ir_x_negativo) step_x(-1, x_posicao);
 
-    if (y_joystick > 550 && yMax.read()) step_y(+1, y_posicao);
-    else if (y_joystick < 450 && yMin.read()) step_y(-1, y_posicao);
+    if (y_joystick > 550 && pode_ir_y_positivo) step_y(+1, y_posicao);
+    else if (y_joystick < 450 && pode_ir_y_negativo) step_y(-1, y_posicao);
 
     // Z pelos botões Nextion ('U' para subir, 'D' para descer)
     // É preciso adaptar com a parte do nextion depois
