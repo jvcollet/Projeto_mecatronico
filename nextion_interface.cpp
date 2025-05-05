@@ -1,5 +1,6 @@
 #include "mbed.h"
 #include <cstring>
+#include <vector>
 
 Serial nextion(PC_10, PC_11);  // TX, RX
 Serial pc(USBTX, USBRX);       // Para debug
@@ -12,6 +13,9 @@ int rx_index = 0;
 bool comando_disponivel = false;
 
 char comando_atual[10] = "";
+
+char status1[32] = "Sistema pronto";
+char status2[32] = "Aguardando comando";
 
 // Interrupção UART
 void rx_handler() {
@@ -37,6 +41,7 @@ void iniciar_nextion() {
     pc.baud(9600);
     nextion.attach(&rx_handler, Serial::RxIrq);
     strcpy(comando_atual, "");
+    atualizar_status();
 }
 
 // Atualiza o estado do comando
@@ -92,7 +97,6 @@ std::vector<int> botao_z_baixo() {
     return {false, -1};
 }
 
-
 // Envia texto para um componente do Nextion
 void enviar_texto_nextion(const char* componente, const char* texto) {
     char cmd[100];
@@ -106,5 +110,17 @@ void enviar_texto_nextion(const char* componente, const char* texto) {
 // Atualiza os campos t0 e t1 no display
 void atualizar_status() {
     enviar_texto_nextion("t0", status1);
+    enviar_texto_nextion("t1", status2);
+}
+
+void atualizar_t0(const char* texto) {
+    strncpy(status1, texto, sizeof(status1)-1);
+    status1[sizeof(status1)-1] = '\0';
+    enviar_texto_nextion("t0", status1);
+}
+
+void atualizar_t1(const char* texto) {
+    strncpy(status2, texto, sizeof(status2)-1);
+    status2[sizeof(status2)-1] = '\0';
     enviar_texto_nextion("t1", status2);
 }

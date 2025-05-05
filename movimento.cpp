@@ -28,10 +28,7 @@ int x_posicao_max = 1600;  // passos até o outro fim de curso
 int y_posicao_max = 1600;  // passos até o outro fim de curso
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
 
-bool pode_ir_x_positivo = (x_posicao < x_posicao_max);
-bool pode_ir_x_negativo = (x_posicao > 0);
-bool pode_ir_y_positivo = (y_posicao < y_posicao_max);
-bool pode_ir_y_negativo = (y_posicao > 0);
+
 
 // Gera pulso de passo para drivers X e Y
 static void pulso_step(DigitalOut &CLK) {
@@ -74,6 +71,11 @@ void step_z(int direction, int &pos) {
 
 // Movimento manual: X/Y via joystick e Z via Nextion, só se manual == true
 void movimento_manual(int x_joystick, int y_joystick, bool manual) {
+
+    bool pode_ir_x_positivo = (x_posicao < x_posicao_max);
+    bool pode_ir_x_negativo = (x_posicao >= 0);
+    bool pode_ir_y_positivo = (y_posicao < y_posicao_max);
+    bool pode_ir_y_negativo = (y_posicao >= 0);
     // Não executa o código se for falso
     if (!manual) return;
     // X e Y pelo joystick

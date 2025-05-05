@@ -26,5 +26,7 @@ std::vector<int> botao_z_baixo();
 // Funções de comunicação com o Nextion
 void enviar_texto_nextion(const char* componente, const char* texto);
 void atualizar_status();
+void atualizar_t0(const char* texto);
+void atualizar_t1(const char* texto);
 
 #endif // NEXTION_INTERFACE_H
