@@ -24,8 +24,8 @@ extern int y_posicao;
 extern int z_posicao;
 
 #define VELO_HOMING    200   // meio período de pulso (s)
-int x_posicao_max = 1600;  // passos até o outro fim de curso
-int y_posicao_max = 1600;  // passos até o outro fim de curso
+int x_posicao_max = 8600;  // passos até o outro fim de curso
+int y_posicao_max = 8600;  // passos até o outro fim de curso
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
 
 

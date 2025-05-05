@@ -54,19 +54,6 @@ int main() {
     // atualizar_t0("Esperando referenciamento");
     atualizar_t1("Clique no referenciamento");
     atualizar_comando();
-    // referenciar();
-
-    // Teste nextion
-    while(true){
-        if (botao_referenciamento()) {
-            atualizar_t0("Referenciando...");
-            atualizar_t1("Aguarde");
-            referenciar();
-            atualizar_t0("Sistema pronto");
-            atualizar_t1("Use o joystick para posicionar coleta");
-        }
-    }
-
 
     bool modo_manual = true;
     int contador_posicoes = 0;
@@ -81,6 +68,13 @@ int main() {
         int yv = yAxis.read() * 1000;
         movimento_manual(xv, yv, modo_manual);
 
+        if (botao_referenciamento()) {
+            atualizar_t0("Referenciando...");
+            atualizar_t1("Aguarde");
+            referenciar();
+            atualizar_t0("Sistema pronto");
+            atualizar_t1("Use o joystick para posicionar coleta");
+        }
         if (botao.read() == 0) {
             salvar_posicao(x_posicao, y_posicao, z_posicao);
             contador_posicoes++;
