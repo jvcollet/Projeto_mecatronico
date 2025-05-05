@@ -3,10 +3,9 @@
 #include <vector>
 
 Serial nextion(PC_10, PC_11);  // TX, RX
-Serial pc(USBTX, USBRX);       // Para debug
-DigitalOut led1(LED1);         // LED indicador
+Serial pc(USBTX, USBRX);
+DigitalOut led1(LED1);
 
-// Buffer UART
 char rx_char;
 char rx_buffer[64];
 int rx_index = 0;
@@ -17,12 +16,14 @@ char comando_atual[10] = "";
 char status1[32] = "Sistema pronto";
 char status2[32] = "Aguardando comando";
 
-// Interrupção UART
+void enviar_texto_nextion(const char* componente, const char* texto); // <- protótipo
+void atualizar_status(); // <- protótipo
+
 void rx_handler() {
     led1 = !led1;
     while (nextion.readable()) {
         rx_char = nextion.getc();
-        if (rx_char == '\n' || rx_char == '\r') continue; // Ignora quebras de linha
+        if (rx_char == '\n' || rx_char == '\r') continue;
         rx_buffer[rx_index++] = rx_char;
 
         if (rx_index >= 3) {
@@ -35,7 +36,6 @@ void rx_handler() {
     }
 }
 
-// Inicializa comunicação com Nextion
 void iniciar_nextion() {
     nextion.baud(9600);
     pc.baud(9600);
@@ -44,7 +44,6 @@ void iniciar_nextion() {
     atualizar_status();
 }
 
-// Atualiza o estado do comando
 bool atualizar_comando() {
     if (comando_disponivel) {
         comando_disponivel = false;
@@ -54,50 +53,29 @@ bool atualizar_comando() {
     return false;
 }
 
-// Funções para cada botão:
-bool botao_salvar_coleta() {
-    return (strcmp(comando_atual, "S_C") == 0);
-}
+bool botao_salvar_coleta() { return (strcmp(comando_atual, "S_C") == 0); }
+bool botao_salvar_dispensa() { return (strcmp(comando_atual, "S_D") == 0); }
+bool botao_referenciamento() { return (strcmp(comando_atual, "REF") == 0); }
+bool botao_iniciar_ciclo() { return (strcmp(comando_atual, "I_C") == 0); }
+bool botao_aumentar_volume() { return (strcmp(comando_atual, "+ml") == 0); }
+bool botao_diminuir_volume() { return (strcmp(comando_atual, "-ml") == 0); }
 
-bool botao_salvar_dispensa() {
-    return (strcmp(comando_atual, "S_D") == 0);
-}
-
-bool botao_referenciamento() {
-    return (strcmp(comando_atual, "REF") == 0);
-}
-
-bool botao_iniciar_ciclo() {
-    return (strcmp(comando_atual, "I_C") == 0);
-}
-
-bool botao_aumentar_volume() {
-    return (strcmp(comando_atual, "+ml") == 0);
-}
-
-bool botao_diminuir_volume() {
-    return (strcmp(comando_atual, "-ml") == 0);
-}
-
-// Retorna estado do botão de movimento Z (True se pressionado/solto)
-// [True, 0] -> pressionado, [True, 1] -> solto
 std::vector<int> botao_z_cima() {
-    if (strcmp(comando_atual, "ZUT") == 0)
-        return {true, 0};
-    if (strcmp(comando_atual, "ZUR") == 0)
-        return {true, 1};
-    return {false, -1};
+    std::vector<int> v;
+    if (strcmp(comando_atual, "ZUT") == 0) { v.push_back(true); v.push_back(0); }
+    else if (strcmp(comando_atual, "ZUR") == 0) { v.push_back(true); v.push_back(1); }
+    else { v.push_back(false); v.push_back(-1); }
+    return v;
 }
 
 std::vector<int> botao_z_baixo() {
-    if (strcmp(comando_atual, "ZDT") == 0)
-        return {true, 0};
-    if (strcmp(comando_atual, "ZDR") == 0)
-        return {true, 1};
-    return {false, -1};
+    std::vector<int> v;
+    if (strcmp(comando_atual, "ZDT") == 0) { v.push_back(true); v.push_back(0); }
+    else if (strcmp(comando_atual, "ZDR") == 0) { v.push_back(true); v.push_back(1); }
+    else { v.push_back(false); v.push_back(-1); }
+    return v;
 }
 
-// Envia texto para um componente do Nextion
 void enviar_texto_nextion(const char* componente, const char* texto) {
     char cmd[100];
     sprintf(cmd, "%s.txt=\"%s\"", componente, texto);
@@ -107,7 +85,6 @@ void enviar_texto_nextion(const char* componente, const char* texto) {
     nextion.putc(0xFF);
 }
 
-// Atualiza os campos t0 e t1 no display
 void atualizar_status() {
     enviar_texto_nextion("t0", status1);
     enviar_texto_nextion("t1", status2);

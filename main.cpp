@@ -38,19 +38,11 @@ AnalogIn   yAxis(A1);
 
 // Comunicação com Nextion (declarado em nextion_interface.cpp)
 extern Serial nextion;
+extern char comando_atual[10];
+
 
 int main() {
     iniciar_nextion();
-
-    // Verifica se o botão de referenciamento foi clicado
-    atualizar_comando();
-    if (botao_referenciamento()) {
-        atualizar_t0("Referenciando...");
-        atualizar_t1("Aguarde");
-        referenciar();
-        atualizar_t0("Sistema pronto");
-        atualizar_t1("Use o joystick para posicionar coleta");
-    }
 
     // Ativa pull-ups internos nos sensores
     xMin.mode(PullUp);  xMax.mode(PullUp);
@@ -58,20 +50,31 @@ int main() {
     zMin.mode(PullUp);  zMax.mode(PullUp);
 
     // 1) Referenciamento inicial
-    atualizar_t0("Referenciando...");
-    atualizar_t1("Aguarde");
-    referenciar();
-    Led = 1;
-    atualizar_t0("Sistema pronto");
-    atualizar_t1("Use o joystick para posicionar coleta");
+    // Verifica se o botão de referenciamento foi clicado
+    // atualizar_t0("Esperando referenciamento");
+    atualizar_t1("Clique no referenciamento");
+    atualizar_comando();
+    // referenciar();
+
+    // Teste nextion
+    while(true){
+        if (botao_referenciamento()) {
+            atualizar_t0("Referenciando...");
+            atualizar_t1("Aguarde");
+            referenciar();
+            atualizar_t0("Sistema pronto");
+            atualizar_t1("Use o joystick para posicionar coleta");
+        }
+    }
+
 
     bool modo_manual = true;
     int contador_posicoes = 0;
 
-    printf("\n=== Sistema Iniciado ===\n");
+    // printf("\n=== Sistema Iniciado ===\n");
 
-    printf("\n>> Posicione a pipeta na posição de COLETA usando o joystick.\n");
-    printf(">> Pressione o botão para salvar a posição de coleta.\n");
+    // printf("\n>> Posicione a pipeta na posição de COLETA usando o joystick.\n");
+    // printf(">> Pressione o botão para salvar a posição de coleta.\n");
 
     while (true) {
         int xv = xAxis.read() * 1000;
@@ -155,3 +158,4 @@ int main() {
         wait(5.0);
     }
 }
+
