@@ -50,12 +50,12 @@ int main() {
     zMin.mode(PullUp);  zMax.mode(PullUp);
 
     // Variáveis de controle dos botões
-    bool salvar_coleta = false;
-    bool salvar_dispensa = false;
-    bool iniciar_ciclo = false;
+    // bool salvar_coleta = false;
+    // bool salvar_dispensa = false;
+    // bool iniciar_ciclo = false;
     bool referenciar_sistema = false;
-    bool aumentar_volume = false;
-    bool diminuir_volume = false;
+    // bool aumentar_volume = false;
+    // bool diminuir_volume = false;
 
     // Mensagens iniciais
     atualizar_t0("Sistema iniciado");
