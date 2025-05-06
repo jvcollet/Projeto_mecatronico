@@ -15,7 +15,7 @@ DigitalOut CLK_Y(D12);
 DigitalOut ENABLE_Y(D5, 0);  // enable ativo baixo
 
 // Motor Z via BusOut
- BusOut MP3(D13, D14, D15, D15);
+BusOut MP3(D13, D14, D15, D15);
 
 // Sensores de fim de curso
 DigitalIn xMin(D10);
@@ -50,17 +50,16 @@ int main() {
     yMin.mode(PullUp);  yMax.mode(PullUp);
     zMin.mode(PullUp);  zMax.mode(PullUp);
 
-    // Variáveis de controle dos botões
-    // bool salvar_coleta = false;
-    // bool salvar_dispensa = false;
-    // bool iniciar_ciclo = false;
+    // Estados de botões Nextion
+    bool btn_iniciar = false;
+    bool btn_ok = false;
+    bool btn_mais = false;
+    bool btn_menos = false;
     bool referenciar_sistema = false;
-    // bool aumentar_volume = false;
-    // bool diminuir_volume = false;
 
     // Mensagens iniciais
-    atualizar_t0("Sistema iniciado");
-    atualizar_t1("Clique no botao de referenciar");
+    atualizar_t0("Clique no botao de referenciar");
+    atualizar_t1("Sistema iniciado");
     atualizar_t2("Posicoes ainda nao refernciadas");
 
     bool modo_manual = true;
@@ -73,47 +72,70 @@ int main() {
         
  
         botao_referenciamento(referenciar_sistema);
+        botao_mais(btn_mais);
+        botao_menos(btn_menos);
+        botao_iniciar_sistema(btn_iniciar);
+        botao_ok(btn_ok);
+
         atualizar_comando();
+
+        // Debug para ler comando nextion
         if (atualizar_comando()) {
-            atualizar_t0(comando_atual);  // Mostra no campo t0 o que foi lido
+            atualizar_t0(comando_atual);
         }
+        
         if (referenciar_sistema) {
-            atualizar_t0("Referenciando...");
-            atualizar_t1("Aguarde");
+            atualizar_t0("Aguarde o refernciamento");
+            atualizar_t1("Referenciando...");
             referenciar();
-            atualizar_t0("Sistema pronto");
-            atualizar_t1("Use o joystick para posicionar coleta");
+            atualizar_t0("Utilize o joystick para mover ou inicie o sistema");
+            atualizar_t1("Aguardando comando");
         
             referenciar_sistema = false;
             strcpy(comando_atual, ""); // LIMPA O COMANDO AQUI
         }
-    }
-//         if (botao.read() == 0) {
-//             salvar_posicao(x_posicao, y_posicao, z_posicao);
-//             contador_posicoes++;
-//             atualizar_t0("Posicao de coleta salva");
-//             atualizar_t1("Posicione para dispensa");
-//             wait(0.5);
-//             break;
-//         }
+        
+        // Formato para colocar a posição do X e Y
+        char buffer[64];
+        sprintf(buffer, "Posicao atual - X: %d Y: %d", x_posicao, y_posicao);
+        atualizar_t2(buffer);
 
-//         if (emergencia.read() == 0) {
-//             printf("\n!!! Emergência !!!\n");
-//             atualizar_t0("!!! Emergência !!!");
-//             atualizar_t1("Aguardando liberacao...");
-//             ENABLE_X = 1;
-//             ENABLE_Y = 1;
-//             MP3 = 0;
-//             Led = 0;
-//             while (emergencia.read() == 0) wait(0.1);
-//             // printf("\nEmergência liberada. Referenciando...\n");
-//             atualizar_t0("Referenciando...");
-//             atualizar_t1("Aguarde");
-//             referenciar();
-//             Led = 1;
-//             atualizar_t0("Sistema pronto");
-//         }
-//     }
+        // Lógica da interface (controle_posicoes.cpp)
+        logica_interface_usuario(btn_iniciar, btn_mais, btn_menos, btn_ok);
+
+        // Reset das flags dos botões
+        btn_iniciar = false;
+        btn_ok = false;
+        btn_mais = false;
+        btn_menos = false;
+    
+        // if (botao.read() == 0) {
+        //     salvar_posicao(x_posicao, y_posicao, z_posicao);
+        //     contador_posicoes++;
+        //     atualizar_t0("Posicao de coleta salva");
+        //     atualizar_t1("Posicione para dispensa");
+        //     wait(0.5);
+        //     break;
+        // }
+
+        // if (emergencia.read() == 0) {
+        //     printf("\n!!! Emergência !!!\n");
+        //     atualizar_t0("!!! Emergência !!!");
+        //     atualizar_t1("Aguardando liberacao...");
+        //     ENABLE_X = 1;
+        //     ENABLE_Y = 1;
+        //     MP3 = 0;
+        //     Led = 0;
+        //     while (emergencia.read() == 0) wait(0.1);
+        //     // printf("\nEmergência liberada. Referenciando...\n");
+        //     atualizar_t0("Referenciando...");
+        //     atualizar_t1("Aguarde");
+        //     referenciar();
+        //     Led = 1;
+        //     atualizar_t0("Sistema pronto");
+        // }
+    }
+    }
 
     
 //     while (contador_posicoes < 10) {

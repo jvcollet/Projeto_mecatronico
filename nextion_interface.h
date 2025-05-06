@@ -12,12 +12,13 @@ void iniciar_nextion();
 bool atualizar_comando();
 
 // Funções booleanas para botões (agora recebem referência a variável para ativação)
-void botao_salvar_coleta(bool &variavel);
-void botao_salvar_dispensa(bool &variavel);
 void botao_referenciamento(bool &variavel);
-void botao_iniciar_ciclo(bool &variavel);
-void botao_aumentar_volume(bool &variavel);
-void botao_diminuir_volume(bool &variavel);
+void botao_mais(bool &variavel);
+void botao_menos(bool &variavel);
+void botao_iniciar_sistema(bool &variavel);
+void botao_salvar_posicao(bool &variavel);
+void botao_ok(bool &variavel);
+
 
 // Funções para botão de movimentação do eixo Z (retornam true/false direto)
 bool botao_z_cima();   // true se comando == "ZUT"

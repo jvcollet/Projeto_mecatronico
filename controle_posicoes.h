@@ -5,18 +5,22 @@
 #include "mbed.h"
 #include "movimento.h"  // para protótipos de step_x, step_y, step_z
 
-// Número máximo de posições
 #define MAX_POSICOES 9
 
-// Estrutura para armazenar uma posição
+// Estrutura que representa uma posição com volume associado
 typedef struct {
     float x;
     float y;
     float z;
+    int volume;  // Volume em ml
 } Posicao;
 
-// Funções disponíveis
+// Salva a posição atual (em diferentes etapas da interface)
 void salvar_posicao(float x_atual, float y_atual, float z_atual);
+
+// Lógica da interface baseada nos botões
+void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool ok);
+
 void executar_ciclo(void);
 
 #endif // CONTROLE_POSICOES_H

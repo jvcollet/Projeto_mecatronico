@@ -51,7 +51,6 @@ void rx_handler() {
     }
 }
 
-
 void iniciar_nextion() {
     nextion.baud(9600);
     pc.baud(9600);
@@ -69,14 +68,21 @@ bool atualizar_comando() {
     return false;
 }
 
-void botao_salvar_coleta(bool &variavel) {
-    if (strcmp(comando_atual, "S_C") == 0) {
+// Novos botões com base na nova interface Nextion
+void botao_iniciar_sistema(bool &variavel) {
+    if (strcmp(comando_atual, "I_S") == 0) {
         variavel = true;
     }
 }
 
-void botao_salvar_dispensa(bool &variavel) {
-    if (strcmp(comando_atual, "S_D") == 0) {
+void botao_salvar_posicao(bool &variavel) {
+    if (strcmp(comando_atual, "S_P") == 0) {
+        variavel = true;
+    }
+}
+
+void botao_ok(bool &variavel) {
+    if (strcmp(comando_atual, "_OK") == 0) {
         variavel = true;
     }
 }
@@ -87,30 +93,24 @@ void botao_referenciamento(bool &variavel) {
     }
 }
 
-void botao_iniciar_ciclo(bool &variavel) {
-    if (strcmp(comando_atual, "I_C") == 0) {
-        variavel = true;
-    }
-}
-
-void botao_aumentar_volume(bool &variavel) {
+void botao_mais(bool &variavel) {
     if (strcmp(comando_atual, "+ml") == 0) {
         variavel = true;
     }
 }
 
-void botao_diminuir_volume(bool &variavel) {
+void botao_menos(bool &variavel) {
     if (strcmp(comando_atual, "-ml") == 0) {
         variavel = true;
     }
 }
 
 bool botao_z_cima() {
-    return (strcmp(comando_atual, "ZUT") == 0); // true para ZUT, false para outros
+    return (strcmp(comando_atual, "ZUT") == 0);
 }
 
 bool botao_z_baixo() {
-    return (strcmp(comando_atual, "ZDT") == 0); // true para ZDT, false para outros
+    return (strcmp(comando_atual, "ZDT") == 0);
 }
 
 void atualizar_status() {
@@ -132,7 +132,7 @@ void atualizar_t1(const char* texto) {
 }
 
 void atualizar_t2(const char* texto) {
-    static char status3[64]; // você pode ajustar o tamanho conforme necessário
+    static char status3[64];
     strncpy(status3, texto, sizeof(status3) - 1);
     status3[sizeof(status3) - 1] = '\0';
     enviar_texto_nextion("t2", status3);
