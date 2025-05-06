@@ -53,28 +53,51 @@ bool atualizar_comando() {
     return false;
 }
 
-bool botao_salvar_coleta() { return (strcmp(comando_atual, "S_C") == 0); }
-bool botao_salvar_dispensa() { return (strcmp(comando_atual, "S_D") == 0); }
-bool botao_referenciamento() { return (strcmp(comando_atual, "REF") == 0); }
-bool botao_iniciar_ciclo() { return (strcmp(comando_atual, "I_C") == 0); }
-bool botao_aumentar_volume() { return (strcmp(comando_atual, "+ml") == 0); }
-bool botao_diminuir_volume() { return (strcmp(comando_atual, "-ml") == 0); }
-
-std::vector<int> botao_z_cima() {
-    std::vector<int> v;
-    if (strcmp(comando_atual, "ZUT") == 0) { v.push_back(true); v.push_back(0); }
-    else if (strcmp(comando_atual, "ZUR") == 0) { v.push_back(true); v.push_back(1); }
-    else { v.push_back(false); v.push_back(-1); }
-    return v;
+void botao_salvar_coleta(bool &variavel) {
+    if (strcmp(comando_atual, "S_C") == 0) {
+        variavel = true;
+    }
 }
 
-std::vector<int> botao_z_baixo() {
-    std::vector<int> v;
-    if (strcmp(comando_atual, "ZDT") == 0) { v.push_back(true); v.push_back(0); }
-    else if (strcmp(comando_atual, "ZDR") == 0) { v.push_back(true); v.push_back(1); }
-    else { v.push_back(false); v.push_back(-1); }
-    return v;
+void botao_salvar_dispensa(bool &variavel) {
+    if (strcmp(comando_atual, "S_D") == 0) {
+        variavel = true;
+    }
 }
+
+void botao_referenciamento(bool &variavel) {
+    if (strcmp(comando_atual, "REF") == 0) {
+        variavel = true;
+        strcpy(comando_atual, ""); // limpa após usar
+    }
+}
+
+void botao_iniciar_ciclo(bool &variavel) {
+    if (strcmp(comando_atual, "I_C") == 0) {
+        variavel = true;
+    }
+}
+
+void botao_aumentar_volume(bool &variavel) {
+    if (strcmp(comando_atual, "+ml") == 0) {
+        variavel = true;
+    }
+}
+
+void botao_diminuir_volume(bool &variavel) {
+    if (strcmp(comando_atual, "-ml") == 0) {
+        variavel = true;
+    }
+}
+
+bool botao_z_cima() {
+    return (strcmp(comando_atual, "ZUT") == 0); // true para ZUT, false para outros
+}
+
+bool botao_z_baixo() {
+    return (strcmp(comando_atual, "ZDT") == 0); // true para ZDT, false para outros
+}
+
 
 void enviar_texto_nextion(const char* componente, const char* texto) {
     char cmd[100];
@@ -100,4 +123,11 @@ void atualizar_t1(const char* texto) {
     strncpy(status2, texto, sizeof(status2)-1);
     status2[sizeof(status2)-1] = '\0';
     enviar_texto_nextion("t1", status2);
+}
+
+void atualizar_t2(const char* texto) {
+    static char status3[64]; // você pode ajustar o tamanho conforme necessário
+    strncpy(status3, texto, sizeof(status3) - 1);
+    status3[sizeof(status3) - 1] = '\0';
+    enviar_texto_nextion("t2", status3);
 }
