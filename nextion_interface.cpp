@@ -1,7 +1,7 @@
 #include "mbed.h"
 #include <cstring>
 #include <vector>
-
+#include "nextion_interface.h"
 Serial nextion(PC_10, PC_11);  // TX, RX
 Serial pc(USBTX, USBRX);
 DigitalOut led1(LED1);
@@ -35,10 +35,8 @@ void rx_handler() {
     static int count = 0;
     while (nextion.readable()) {
         char c = nextion.getc();
-
         // Ignora \n, \r e 0xFF
-        if (c == '\n' || c == '\r' || c == 0xFF) continue;
-
+        if (c == '\n' || c == '\r' || c == 0xFF || c == 0x20) continue;
         if (count < 3) {
             comando_atual[count++] = c;
         }
@@ -63,6 +61,7 @@ bool atualizar_comando() {
     if (comando_disponivel) {
         comando_disponivel = false;
         pc.printf("Comando recebido: %s\n", comando_atual);
+        atualizar_t0(comando_atual);
         return true;
     }
     return false;

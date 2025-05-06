@@ -80,34 +80,32 @@ int main() {
         atualizar_comando();
 
         // Debug para ler comando nextion
-        if (atualizar_comando()) {
-            atualizar_t0(comando_atual);
-        }
         
-        if (referenciar_sistema) {
-            atualizar_t0("Aguarde o refernciamento");
-            atualizar_t1("Referenciando...");
-            referenciar();
-            atualizar_t0("Utilize o joystick para mover ou inicie o sistema");
-            atualizar_t1("Aguardando comando");
         
-            referenciar_sistema = false;
-            strcpy(comando_atual, ""); // LIMPA O COMANDO AQUI
-        }
+        // if (referenciar_sistema) {
+        //     atualizar_t0("Aguarde o refernciamento");
+        //     atualizar_t1("Referenciando...");
+        //     referenciar();
+        //     atualizar_t0("Utilize o joystick para mover ou inicie o sistema");
+        //     atualizar_t1("Aguardando comando");
         
-        // Formato para colocar a posição do X e Y
-        char buffer[64];
-        sprintf(buffer, "Posicao atual - X: %d Y: %d", x_posicao, y_posicao);
-        atualizar_t2(buffer);
+        //     referenciar_sistema = false;
+        //     strcpy(comando_atual, ""); // LIMPA O COMANDO AQUI
+        // }
+        
+        // // Formato para colocar a posição do X e Y
+        // char buffer[64];
+        // sprintf(buffer, "Posicao atual - X: %d Y: %d", x_posicao, y_posicao);
+        // atualizar_t2(buffer);
 
-        // Lógica da interface (controle_posicoes.cpp)
-        logica_interface_usuario(btn_iniciar, btn_mais, btn_menos, btn_ok);
+        // // Lógica da interface (controle_posicoes.cpp)
+        // logica_interface_usuario(btn_iniciar, btn_mais, btn_menos, btn_ok);
 
-        // Reset das flags dos botões
-        btn_iniciar = false;
-        btn_ok = false;
-        btn_mais = false;
-        btn_menos = false;
+        // // Reset das flags dos botões
+        // btn_iniciar = false;
+        // btn_ok = false;
+        // btn_mais = false;
+        // btn_menos = false;
     
         // if (botao.read() == 0) {
         //     salvar_posicao(x_posicao, y_posicao, z_posicao);
