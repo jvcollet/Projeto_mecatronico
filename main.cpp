@@ -5,6 +5,7 @@
 #include "controle_posicoes.h"
 #include "nextion_interface.h"
 
+
 // Drivers de passo para X e Y
 DigitalOut DIR_X(D7);
 DigitalOut CLK_X(D11);
@@ -14,7 +15,7 @@ DigitalOut CLK_Y(D12);
 DigitalOut ENABLE_Y(D5, 0);  // enable ativo baixo
 
 // Motor Z via BusOut
-BusOut MP3(D13, D14, D15, D15);
+ BusOut MP3(D13, D14, D15, D15);
 
 // Sensores de fim de curso
 DigitalIn xMin(D10);
@@ -24,7 +25,7 @@ DigitalIn yMax(D9);
 DigitalIn zMin(D0);
 DigitalIn zMax(D1);
 
-// Contadores de posição
+// Contadores de posicao
 int x_posicao = 0;
 int y_posicao = 0;
 int z_posicao = 0;
@@ -36,7 +37,7 @@ DigitalIn  emergencia(PC_14);
 AnalogIn   xAxis(A0);
 AnalogIn   yAxis(A1);
 
-// Comunicação com Nextion (declarado em nextion_interface.cpp)
+// Comunicacao com Nextion (declarado em nextion_interface.cpp)
 extern Serial nextion;
 extern char comando_atual[10];
 
@@ -59,21 +60,23 @@ int main() {
 
     // Mensagens iniciais
     atualizar_t0("Sistema iniciado");
-    atualizar_t1("Clique no botão de referenciar");
-    atualizar_t2("Posicoes ainda não refernciadas");
+    atualizar_t1("Clique no botao de referenciar");
+    atualizar_t2("Posicoes ainda nao refernciadas");
 
     bool modo_manual = true;
-    int contador_posicoes = 0;
+    // int contador_posicoes = 0;
 
     while (true) {
         int xv = xAxis.read() * 1000;
         int yv = yAxis.read() * 1000;
         movimento_manual(xv, yv, modo_manual);
         
-        atualizar_comando();
-
+ 
         botao_referenciamento(referenciar_sistema);
-
+        atualizar_comando();
+        if (atualizar_comando()) {
+            atualizar_t0(comando_atual);  // Mostra no campo t0 o que foi lido
+        }
         if (referenciar_sistema) {
             atualizar_t0("Referenciando...");
             atualizar_t1("Aguarde");
@@ -84,13 +87,11 @@ int main() {
             referenciar_sistema = false;
             strcpy(comando_atual, ""); // LIMPA O COMANDO AQUI
         }
-        wait_ms(100);
-    }
     }
 //         if (botao.read() == 0) {
 //             salvar_posicao(x_posicao, y_posicao, z_posicao);
 //             contador_posicoes++;
-//             atualizar_t0("Posição de coleta salva");
+//             atualizar_t0("Posicao de coleta salva");
 //             atualizar_t1("Posicione para dispensa");
 //             wait(0.5);
 //             break;
@@ -99,7 +100,7 @@ int main() {
 //         if (emergencia.read() == 0) {
 //             printf("\n!!! Emergência !!!\n");
 //             atualizar_t0("!!! Emergência !!!");
-//             atualizar_t1("Aguardando liberação...");
+//             atualizar_t1("Aguardando liberacao...");
 //             ENABLE_X = 1;
 //             ENABLE_Y = 1;
 //             MP3 = 0;
@@ -132,7 +133,7 @@ int main() {
 
 //         if (emergencia.read() == 0) {
 //             atualizar_t0("!!! Emergência !!!");
-//             atualizar_t1("Aguardando liberação...");
+//             atualizar_t1("Aguardando liberaçao...");
 //             ENABLE_X = 1;
 //             ENABLE_Y = 1;
 //             MP3 = 0;

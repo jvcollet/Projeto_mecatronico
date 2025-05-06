@@ -16,25 +16,41 @@ char comando_atual[10] = "";
 char status1[32] = "Sistema pronto";
 char status2[32] = "Aguardando comando";
 
-void enviar_texto_nextion(const char* componente, const char* texto); // <- protótipo
+void enviar_texto_nextion(const char* componente, const char* texto) {
+    static char ultimo_componente[20] = "";
+    static char ultimo_texto[64] = "";
+
+    if (strcmp(componente, ultimo_componente) != 0 || strcmp(texto, ultimo_texto) != 0) {
+        nextion.printf("%s.txt=\"%s\"", componente, texto);
+        nextion.putc(0xFF); nextion.putc(0xFF); nextion.putc(0xFF);
+        strncpy(ultimo_componente, componente, sizeof(ultimo_componente) - 1);
+        strncpy(ultimo_texto, texto, sizeof(ultimo_texto) - 1);
+        wait_ms(100); // reduz risco de 429
+    }
+}
+
 void atualizar_status(); // <- protótipo
 
 void rx_handler() {
-    led1 = !led1;
+    static int count = 0;
     while (nextion.readable()) {
-        rx_char = nextion.getc();
-        if (rx_char == '\n' || rx_char == '\r') continue;
-        rx_buffer[rx_index++] = rx_char;
+        char c = nextion.getc();
 
-        if (rx_index >= 3) {
-            rx_buffer[rx_index] = '\0';
-            strncpy(comando_atual, rx_buffer, sizeof(comando_atual));
+        // Ignora \n, \r e 0xFF
+        if (c == '\n' || c == '\r' || c == 0xFF) continue;
+
+        if (count < 3) {
+            comando_atual[count++] = c;
+        }
+
+        if (count == 3) {
+            comando_atual[3] = '\0';      // Finaliza string corretamente
             comando_disponivel = true;
-            rx_index = 0;
-            break;
+            count = 0;
         }
     }
 }
+
 
 void iniciar_nextion() {
     nextion.baud(9600);
@@ -68,7 +84,6 @@ void botao_salvar_dispensa(bool &variavel) {
 void botao_referenciamento(bool &variavel) {
     if (strcmp(comando_atual, "REF") == 0) {
         variavel = true;
-        strcpy(comando_atual, ""); // limpa após usar
     }
 }
 
@@ -98,19 +113,10 @@ bool botao_z_baixo() {
     return (strcmp(comando_atual, "ZDT") == 0); // true para ZDT, false para outros
 }
 
-
-void enviar_texto_nextion(const char* componente, const char* texto) {
-    char cmd[100];
-    sprintf(cmd, "%s.txt=\"%s\"", componente, texto);
-    nextion.printf("%s", cmd);
-    nextion.putc(0xFF);
-    nextion.putc(0xFF);
-    nextion.putc(0xFF);
-}
-
 void atualizar_status() {
     enviar_texto_nextion("t0", status1);
     enviar_texto_nextion("t1", status2);
+    enviar_texto_nextion("t2", status2);
 }
 
 void atualizar_t0(const char* texto) {
