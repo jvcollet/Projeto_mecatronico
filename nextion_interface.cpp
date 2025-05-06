@@ -61,13 +61,13 @@ bool atualizar_comando() {
     if (comando_disponivel) {
         comando_disponivel = false;
         pc.printf("Comando recebido: %s\n", comando_atual);
-        atualizar_t0(comando_atual);
+        // atualizar_t0(comando_atual);
         return true;
     }
     return false;
 }
 
-// Novos botões com base na nova interface Nextion
+// Botões  interface Nextion
 void botao_iniciar_sistema(bool &variavel) {
     if (strcmp(comando_atual, "I_S") == 0) {
         variavel = true;
@@ -112,6 +112,8 @@ bool botao_z_baixo() {
     return (strcmp(comando_atual, "ZDT") == 0);
 }
 
+
+// Comandos de mudança de texto
 void atualizar_status() {
     enviar_texto_nextion("t0", status1);
     enviar_texto_nextion("t1", status2);
