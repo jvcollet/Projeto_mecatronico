@@ -3,26 +3,6 @@
 #include "controle_posicoes.h"
 #include "nextion_interface.h"
 
-// Variáveis de posição globais
-extern int x_posicao;
-extern int y_posicao;
-extern int z_posicao;
-
-// Lista de posições salvas
-static Posicao posicoes[MAX_POSICOES];
-static int total_posicoes = 0;
-
-// Posição de coleta única
-static Posicao posicao_coleta;
-bool coleta_salva = false;
-
-// Estado da interface
-static int estado_interface = 0;
-static int total_dispensas = 1;
-static int volume_atual = 1;
-static int posicao_index = 0;
-
-
 // Salva uma nova posição
 void salvar_posicao(float x_atual, float y_atual, float z_atual) {
     if (estado_interface == 2 && !coleta_salva) {
@@ -52,6 +32,7 @@ void salvar_posicao(float x_atual, float y_atual, float z_atual) {
         } else {
             atualizar_t0("Ciclo pronto para iniciar");
             atualizar_t1("Pressione OK para executar");
+            pronto_iniciar = true;
         }
     }
 }
@@ -103,40 +84,52 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
     }
 }
 
+// Função auxiliar: move com segurança até a posição alvo
+static void mover_para_posicao(const Posicao &alvo) {
+    // 1. Sobe o eixo Z até o máximo (por segurança)
+    // while (zMax.read() == 1) {
+    //     step_z(+1, z_posicao);
+    // }
 
-// NOVA função auxiliar: move com segurança
-// static void mover_para_posicao(const Posicao &alvo) {
-//     // 1. Primeiro, sobe o eixo Z até o máximo (enquanto o sensor não detectar)
-//     printf("\nSubindo Z até o máximo...\n");
-//     while (zMax.read() == 1) {
-//         step_z(+1, z_posicao);
-//     }
+    // 2. Move X até a posição alvo (com tolerância)
+    while (x_posicao < alvo.x - 1) step_x(+1, x_posicao);
+    while (x_posicao > alvo.x + 1) step_x(-1, x_posicao);
 
-//     // 2. Move os eixos X e Y até a posição alvo
-//     printf("Movendo X e Y até posição desejada...\n");
-//     while (x_posicao < alvo.x - 1.0f) step_x(+1, x_posicao);
-//     while (x_posicao > alvo.x + 1.0f) step_x(-1, x_posicao);
+    // 3. Move Y até a posição alvo (com tolerância)
+    while (y_posicao < alvo.y - 1) step_y(+1, y_posicao);
+    while (y_posicao > alvo.y + 1) step_y(-1, y_posicao);
 
-//     while (y_posicao < alvo.y - 1.0f) step_y(+1, y_posicao);
-//     while (y_posicao > alvo.y + 1.0f) step_y(-1, y_posicao);
+    // 4. Move Z até a posição desejada
+    // while (z_posicao < alvo.z - 1) step_z(+1, z_posicao);
+    // while (z_posicao > alvo.z + 1) step_z(-1, z_posicao);
+}
 
-//     // 3. Desce o eixo Z até a posição alvo
-//     printf("Descendo Z até posição desejada...\n");
-//     while (z_posicao < alvo.z - 1.0f) step_z(+1, z_posicao);
-//     while (z_posicao > alvo.z + 1.0f) step_z(-1, z_posicao);
-// }
+// Executa o ciclo completo: coleta e dispensa volumes
+void executar_ciclo(void) {
+    if (!coleta_salva) {
+        atualizar_t0("Posição de coleta não definida.");
+        return;
+    }
 
-// // Executa ciclo completo
-// void executar_ciclo(void) {
-//     printf("\nIniciando ciclo automático...\n");
-//     for (int i = 0; i < total_posicoes; ++i) {
-//         printf("\nMovendo para posição %d: (%.2f, %.2f, %.2f)\n",
-//                i,
-//                posicoes[i].x,
-//                posicoes[i].y,
-//                posicoes[i].z);
-//         mover_para_posicao(posicoes[i]);
-//         wait(1.5f);  // tempo de coleta/dispensa
-//     }
-//     printf("\nCiclo automático finalizado.\n");
-// }
+    atualizar_t0("Executando ciclo...");
+    wait_ms(5000); // breve pausa para leitura da mensagem
+
+    for (int i = 0; i < total_posicoes; ++i) {
+        const Posicao &dispensa = posicoes[i];
+        int volume_restante = dispensa.volume;
+
+        while (volume_restante > 0) {
+            // 1. Vai para a posição de coleta
+            mover_para_posicao(posicao_coleta);
+            wait_ms(5000);  // tempo simulado de coleta
+
+            // 2. Vai para a posição de dispensa
+            mover_para_posicao(dispensa);
+            wait_ms(5000);  // tempo simulado de dispensa
+
+            volume_restante--;  // cada ciclo transfere 1ml
+        }
+    }
+
+    atualizar_t0("Ciclo finalizado.");
+}

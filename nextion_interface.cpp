@@ -1,6 +1,8 @@
 #include "mbed.h"
 #include <cstring>
 #include <vector>
+#include <stdbool.h>
+#include <string.h>
 #include "nextion_interface.h"
 Serial nextion(PC_10, PC_11);  // TX, RX
 Serial pc(USBTX, USBRX);
@@ -25,11 +27,30 @@ void enviar_texto_nextion(const char* componente, const char* texto) {
         nextion.putc(0xFF); nextion.putc(0xFF); nextion.putc(0xFF);
         strncpy(ultimo_componente, componente, sizeof(ultimo_componente) - 1);
         strncpy(ultimo_texto, texto, sizeof(ultimo_texto) - 1);
-        wait_ms(100); // reduz risco de 429
+        wait_ms(400); // reduz risco de 429
     }
 }
 
-void atualizar_status(); // <- protótipo
+// Função utilitária: compara se duas strings têm o mesmo multiconjunto de caracteres
+bool same_letters(const char* a, const char* b) {
+    size_t la = strlen(a), lb = strlen(b);
+    if (la != lb) return false;
+
+    int counts[256] = {0};
+    for (size_t i = 0; i < la; i++) {
+        unsigned char ca = (unsigned char)a[i];
+        unsigned char cb = (unsigned char)b[i];
+        counts[ca]++;
+        counts[cb]--;
+    }
+    for (int i = 0; i < 256; i++) {
+        if (counts[i] != 0) return false;
+    }
+    return true;
+}
+
+// Macro pra ficar mais legível
+#define IS_CMD(cmd, exp)  (same_letters(cmd, exp))
 
 void rx_handler() {
     static int count = 0;
@@ -61,7 +82,7 @@ bool atualizar_comando() {
     if (comando_disponivel) {
         comando_disponivel = false;
         pc.printf("Comando recebido: %s\n", comando_atual);
-        // atualizar_t0(comando_atual);
+        //atualizar_t0(comando_atual);
         return true;
     }
     return false;
@@ -69,47 +90,55 @@ bool atualizar_comando() {
 
 // Botões  interface Nextion
 void botao_iniciar_sistema(bool &variavel) {
-    if (strcmp(comando_atual, "I_S") == 0) {
+    if (IS_CMD(comando_atual, "I_S")) {
         variavel = true;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
     }
 }
 
 void botao_salvar_posicao(bool &variavel) {
-    if (strcmp(comando_atual, "S_P") == 0) {
+    if (IS_CMD(comando_atual, "S_P")) {
         variavel = true;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
     }
 }
 
 void botao_ok(bool &variavel) {
-    if (strcmp(comando_atual, "_OK") == 0) {
+    if (IS_CMD(comando_atual, "_OK")) {
         variavel = true;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
     }
 }
 
 void botao_referenciamento(bool &variavel) {
-    if (strcmp(comando_atual, "REF") == 0) {
+    if (IS_CMD(comando_atual, "REF")) {
         variavel = true;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
     }
 }
 
 void botao_mais(bool &variavel) {
-    if (strcmp(comando_atual, "+ml") == 0) {
+    if (IS_CMD(comando_atual, "+ml")) {
         variavel = true;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
     }
 }
 
 void botao_menos(bool &variavel) {
-    if (strcmp(comando_atual, "-ml") == 0) {
+    if (IS_CMD(comando_atual, "-ml")) {
         variavel = true;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
     }
 }
 
 bool botao_z_cima() {
-    return (strcmp(comando_atual, "ZUT") == 0);
+    return IS_CMD(comando_atual, "ZUT");
+    strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
 }
 
 bool botao_z_baixo() {
-    return (strcmp(comando_atual, "ZDT") == 0);
+    return IS_CMD(comando_atual, "ZDT");
+    strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
 }
 
 
