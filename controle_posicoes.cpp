@@ -22,104 +22,86 @@ static int total_dispensas = 1;
 static int volume_atual = 1;
 static int posicao_index = 0;
 
-extern bool btn_ok;
-extern bool btn_mais;
-extern bool btn_menos;
-
 
 // Salva uma nova posição
 void salvar_posicao(float x_atual, float y_atual, float z_atual) {
-    while(true){
-        if (estado_interface == 2 && !coleta_salva) {
-            posicao_coleta.x = x_atual;
-            posicao_coleta.y = y_atual;
-            posicao_coleta.z = z_atual;
-            coleta_salva = true;
+    if (estado_interface == 2 && !coleta_salva) {
+        posicao_coleta.x = x_atual;
+        posicao_coleta.y = y_atual;
+        posicao_coleta.z = z_atual;
+        coleta_salva = true;
+        atualizar_t0("Selecione a posicao e o volume e precione em OK");
+        char texto_1[32];
+        sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
+        atualizar_t1(texto_1);
+        estado_interface = 3;
+    } else if (estado_interface == 3 && total_posicoes < total_dispensas) {
+        posicoes[total_posicoes].x = x_atual;
+        posicoes[total_posicoes].y = y_atual;
+        posicoes[total_posicoes].z = z_atual;
+        posicoes[total_posicoes].volume = volume_atual;
+        total_posicoes++;
+
+        if (total_posicoes < total_dispensas) {
+            posicao_index++;
+            volume_atual = 1;
             atualizar_t0("Selecione a posicao e o volume e precione em OK");
             char texto_1[32];
             sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
             atualizar_t1(texto_1);
-            estado_interface = 3;
-        } else if (estado_interface == 3 && total_posicoes < total_dispensas) {
-            posicoes[total_posicoes].x = x_atual;
-            posicoes[total_posicoes].y = y_atual;
-            posicoes[total_posicoes].z = z_atual;
-            posicoes[total_posicoes].volume = volume_atual;
-            total_posicoes++;
-
-            if (total_posicoes < total_dispensas) {
-                posicao_index++;
-                volume_atual = 1;
-                atualizar_t0("Selecione a posicao e o volume e precione em OK");
-                char texto_1[32];
-                sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
-                atualizar_t1(texto_1);
-            } else {
-                atualizar_t0("Ciclo pronto para iniciar");
-                atualizar_t1("Pressione OK para executar");
-            }
+        } else {
+            atualizar_t0("Ciclo pronto para iniciar");
+            atualizar_t1("Pressione OK para executar");
         }
     }
 }
 
 void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool ok) {
-    while(true){
-        // Atualizando as variaveis
-        atualizar_comando();
-        botao_mais(mais);
-        botao_menos(menos);
-        botao_ok(ok);
+    switch (estado_interface) {
+        case 0:
+            if (iniciar_sistema) {
+                atualizar_t0("Selecione o numero de dispensas e clique em OK");
+                char texto_1[32];
+                sprintf(texto_1, "Numero de dispensas: %d", total_dispensas);
+                atualizar_t1(texto_1);
+                estado_interface = 1;
+            }
+            break;
 
-        switch (estado_interface) {
-            case 0:
-                if (iniciar_sistema) {
-                    atualizar_t0("Selecione o numero de dispensas e clique em OK");
-                    char texto_1[32];
-                    sprintf(texto_1, "Numero de dispensas: %d", total_dispensas);
-                    atualizar_t1(texto_1);
-                    estado_interface = 1;
-                }
-                break;
+        case 1:
+            if (mais && total_dispensas < MAX_POSICOES) total_dispensas++;
+            if (menos && total_dispensas > 1) total_dispensas--;
+            if (mais || menos) {
+                char texto_1[32];
+                sprintf(texto_1, "Numero de dispensas: %d", total_dispensas);
+                atualizar_t1(texto_1);
+            }
+            if (ok) {
+                atualizar_t0("Selecione a posicao de coleta");
+                atualizar_t1("Clique em OK na posicao");
+                estado_interface = 2;
+            }
+            break;
 
-            case 1:
-                if (mais && total_dispensas < MAX_POSICOES) total_dispensas++;
-                if (menos && total_dispensas > 1) total_dispensas--;
-                if (mais || menos) {
-                    char texto_1[32];
-                    sprintf(texto_1, "Numero de dispensas: %d", total_dispensas);
-                    atualizar_t1(texto_1);
-                }
-                if (ok) {
-                    atualizar_t0("Selecione a posicao de coleta");
-                    atualizar_t1("Clique em OK na posicao");
-                    estado_interface = 2;
-                }
-                break;
+        case 2:
+            if (ok) salvar_posicao(x_posicao, y_posicao, z_posicao);
+            break;
 
-            case 2:
-                if (ok) salvar_posicao(x_posicao, y_posicao, z_posicao);
-                break;
+        case 3:
+            if (mais) volume_atual++;
+            if (menos && volume_atual > 1) volume_atual--;
+            if (mais || menos) {
+                char texto_1[32];
+                sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
+                atualizar_t1(texto_1);
+            }
+            if (ok) salvar_posicao(x_posicao, y_posicao, z_posicao);
+            break;
 
-            case 3:
-                if (mais) volume_atual++;
-                if (menos && volume_atual > 1) volume_atual--;
-                if (mais || menos) {
-                    char texto_1[32];
-                    sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
-                    atualizar_t1(texto_1);
-                }
-                if (ok) salvar_posicao(x_posicao, y_posicao, z_posicao);
-                break;
-
-            default:
-                break;
-        }
-        mais = false;
-        menos = false;
-        ok = false;
+        default:
+            break;
     }
 }
-
 
 
 // NOVA função auxiliar: move com segurança
