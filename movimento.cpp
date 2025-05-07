@@ -53,6 +53,7 @@ void step_y(int direction, int &pos) {
     pos += (direction > 0) ? 1 : -1;
 }
 
+// Movimento eixo Z
 void step_z(int direction, int &pos) {
     if (direction > 0) {
         for (int i = 0; i < 4; ++i) {

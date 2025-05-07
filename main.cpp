@@ -68,16 +68,11 @@ int main() {
     while (true) {
         int xv = xAxis.read() * 1000;
         int yv = yAxis.read() * 1000;
+        atualizar_comando();
         movimento_manual(xv, yv, modo_manual);
         
- 
+        // Lógica referenciamento
         botao_referenciamento(referenciar_sistema);
-        botao_mais(btn_mais);
-        botao_menos(btn_menos);
-        botao_iniciar_sistema(btn_iniciar);
-        botao_ok(btn_ok);
- 
-        
         if (referenciar_sistema) {
             atualizar_t0("Aguarde o refernciamento");
             atualizar_t1("Referenciando...");
@@ -93,8 +88,10 @@ int main() {
         char buffer[64];
         sprintf(buffer, "Posicao atual - X: %d Y: %d", x_posicao, y_posicao);
         atualizar_t2(buffer);
+        atualizar_t0(comando_atual);
 
         // Lógica da interface (controle_posicoes.cpp)
+        botao_iniciar_sistema(btn_iniciar);
         logica_interface_usuario(btn_iniciar, btn_mais, btn_menos, btn_ok);
     
         // if (botao.read() == 0) {
