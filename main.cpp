@@ -93,7 +93,7 @@ int main() {
         
         // Formato para colocar a posição do X e Y
         char buffer[64];
-        sprintf(buffer, "Posicao atual - X: %d Y: %d", x_posicao, y_posicao);
+        sprintf(buffer, "Posicao- X: %d Y: %d", x_posicao, y_posicao);
         atualizar_t2(buffer);
 
         // Lógica da interface (controle_posicoes.cpp)

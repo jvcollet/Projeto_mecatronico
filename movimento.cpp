@@ -24,8 +24,8 @@ extern int y_posicao;
 extern int z_posicao;
 
 #define VELO_HOMING    200   // meio período de pulso (s)
-int x_posicao_max = 8600;  // passos até o outro fim de curso
-int y_posicao_max = 8600;  // passos até o outro fim de curso
+int x_posicao_max = 60000;  // passos até o outro fim de curso
+int y_posicao_max = 60000;  // passos até o outro fim de curso
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
 
 
@@ -83,9 +83,18 @@ bool joystickTickerStarted = false;
 void pulso_joystick_X() {
     if (joystickMoveX) {
         ENABLE_X = 0;
-        DIR_X = joystickDirX;
+        // inverte o bit de DIR:  
+        // agora joystickDirX==1 → direção física 0,  
+        // joystickDirX==0 → direção física 1
+        DIR_X = (joystickDirX == 1) ? 0 : 1;
+
         CLK_X = !CLK_X;
-        if (CLK_X) x_posicao += (joystickDirX == 1) ? 1 : -1;
+        if (CLK_X) {
+            // atualiza posição invertida:
+            // joystickDirX==1 (positivo) → x_posicao--
+            // joystickDirX==0 (negativo) → x_posicao++
+            x_posicao += (joystickDirX == 1) ? -1 : +1;
+        }
     } else {
         CLK_X = 0;
     }
@@ -94,9 +103,11 @@ void pulso_joystick_X() {
 void pulso_joystick_Y() {
     if (joystickMoveY) {
         ENABLE_Y = 0;
-        DIR_Y = joystickDirY;
+        DIR_Y = (joystickDirY == 1) ? 0 : 1;
         CLK_Y = !CLK_Y;
-        if (CLK_Y) y_posicao += (joystickDirY == 1) ? 1 : -1;
+        if (CLK_Y) {
+            y_posicao += (joystickDirY == 1) ? -1 : +1;
+        }
     } else {
         CLK_Y = 0;
     }
@@ -108,15 +119,15 @@ void movimento_manual(int x_joystick, int y_joystick, bool manual) {
     if (!manual) return;
 
     if (!joystickTickerStarted) {
-        tickerX.attach_us(&pulso_joystick_X, 1000); // 500 Hz
-        tickerY.attach_us(&pulso_joystick_Y, 1000);
+        tickerX.attach_us(&pulso_joystick_X, 500); // 500 Hz
+        tickerY.attach_us(&pulso_joystick_Y, 500);
         joystickTickerStarted = true;
     }
 
     if (x_joystick > 550 && x_posicao < x_posicao_max) {
         joystickMoveX = true;
         joystickDirX = 1;
-    } else if (x_joystick < 450 && x_posicao > 0) {
+    } else if (x_joystick < 450 && x_posicao < 0) {
         joystickMoveX = true;
         joystickDirX = 0;
     } else {
@@ -126,7 +137,7 @@ void movimento_manual(int x_joystick, int y_joystick, bool manual) {
     if (y_joystick > 550 && y_posicao < y_posicao_max) {
         joystickMoveY = true;
         joystickDirY = 1;
-    } else if (y_joystick < 450 && y_posicao > 0) {
+    } else if (y_joystick < 450 && y_posicao < 0) {
         joystickMoveY = true;
         joystickDirY = 0;
     } else {
