@@ -41,10 +41,10 @@ static void pulso_step(DigitalOut &CLK) {
 // Funções de passo exportadas
 void step_x(int direction, int &pos) {
     ENABLE_X = 0;
-    DIR_X    = (direction > 0) ? 1 : 0;
+    DIR_X    = (direction < 0) ? 1 : 0;
     pulso_step(CLK_X);
     // lógico invertido:
-    pos += (direction > 0) ? -1 : +1;
+    pos += (direction < 0) ? -1 : +1;
 }
 
 void step_y(int direction, int &pos) {
@@ -93,7 +93,7 @@ void pulso_joystick_X() {
             // atualiza posição invertida:
             // joystickDirX==1 (positivo) → x_posicao--
             // joystickDirX==0 (negativo) → x_posicao++
-            x_posicao += (joystickDirX == 1) ? -1 : +1;
+            x_posicao += (joystickDirX == 1) ? +1 : -1;
         }
     } else {
         CLK_X = 0;
@@ -124,10 +124,10 @@ void movimento_manual(int x_joystick, int y_joystick, bool manual) {
         joystickTickerStarted = true;
     }
 
-    if (x_joystick > 550 && x_posicao < x_posicao_max) {
+    if (x_joystick < 450 && x_posicao < 0) {
         joystickMoveX = true;
         joystickDirX = 1;
-    } else if (x_joystick < 450 && x_posicao < 0) {
+    } else if (x_joystick > 550 && x_posicao < x_posicao_max) {
         joystickMoveX = true;
         joystickDirX = 0;
     } else {

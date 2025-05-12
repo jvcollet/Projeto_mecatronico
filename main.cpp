@@ -7,21 +7,21 @@
 
 
 // Drivers de passo para X e Y
-DigitalOut DIR_X(D7);
-DigitalOut CLK_X(D11);
-DigitalOut ENABLE_X(D4, 0);  // enable ativo baixo
-DigitalOut DIR_Y(D6);
-DigitalOut CLK_Y(D12);
-DigitalOut ENABLE_Y(D5, 0);  // enable ativo baixo
+DigitalOut DIR_X(PB_10);
+DigitalOut CLK_X(PA_8);
+DigitalOut ENABLE_X(PB_4, 0);  // enable ativo baixo
+DigitalOut DIR_Y(PB_3);
+DigitalOut CLK_Y(PB_5);
+DigitalOut ENABLE_Y(PA_10, 0);  // enable ativo baixo
 
 // Motor Z via BusOut
 BusOut MP3(D13, D14, D15, D15);
 
 // Sensores de fim de curso
-DigitalIn xMin(D10);
-DigitalIn xMax(D3);
-DigitalIn yMin(D2);
-DigitalIn yMax(D9);
+DigitalIn xMax(PB_9);
+DigitalIn xMin(PB_8);
+DigitalIn yMin(PA_11);
+DigitalIn yMax(PA_12);
 DigitalIn zMin(D0);
 DigitalIn zMax(D1);
 
@@ -34,8 +34,12 @@ int z_posicao = 0;
 DigitalOut Led(LED1);
 DigitalIn  botao(PC_13);
 DigitalIn  emergencia(PC_14);
-AnalogIn   xAxis(A0);
-AnalogIn   yAxis(A1);
+AnalogIn   xAxis(PA_1);
+AnalogIn   yAxis(PA_0);
+
+//Acionamento pipeta
+DigitalIn mybutton(USER_BUTTON);
+DigitalOut pipetadora(D13); // Rele
 
 // Comunicacao com Nextion (declarado em nextion_interface.cpp)
 extern Serial nextion;
