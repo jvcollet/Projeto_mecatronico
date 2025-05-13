@@ -4,6 +4,7 @@
 #include "referenciamento.h"
 #include "controle_posicoes.h"
 #include "nextion_interface.h"
+#include "pipetadora.h"
 
 
 // Drivers de passo para X e Y
@@ -57,6 +58,7 @@ extern bool coleta_salva;
 
 int main() {
     iniciar_nextion();
+    inicializar_pipetadora();
 
     // Ativa pull-ups internos nos sensores
     xMin.mode(PullUp);  xMax.mode(PullUp);

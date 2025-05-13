@@ -2,6 +2,7 @@
 #include "mbed.h"
 #include "controle_posicoes.h"
 #include "nextion_interface.h"
+#include "pipetadora.h"
 
 // Salva uma nova posição
 void salvar_posicao(float x_atual, float y_atual, float z_atual) {
@@ -76,7 +77,28 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
                 sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
                 atualizar_t1(texto_1);
             }
-            if (ok) salvar_posicao(x_posicao, y_posicao, z_posicao);
+
+            if (ok) {
+                if (!pronto_iniciar) {
+                    salvar_posicao(x_posicao, y_posicao, z_posicao);
+                } else {
+                    atualizar_t0("Iniciando ciclo...");
+                    wait_ms(500);
+                    executar_ciclo();
+
+                    // Reset após o ciclo
+                    estado_interface = 0;
+                    total_dispensas = 1;
+                    volume_atual = 1;
+                    posicao_index = 0;
+                    total_posicoes = 0;
+                    coleta_salva = false;
+                    pronto_iniciar = false;
+
+                    atualizar_t0("Clique iniciar para novo ciclo");
+                    atualizar_t1("Aguardando comando...");
+                }
+            }
             break;
 
         default:
@@ -87,21 +109,21 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
 // Função auxiliar: move com segurança até a posição alvo
 static void mover_para_posicao(const Posicao &alvo) {
     // 1. Sobe o eixo Z até o máximo (por segurança)
-    // while (zMax.read() == 1) {
-    //     step_z(+1, z_posicao);
-    // }
+    //while (zMax.read() == 1) {
+    //    step_z(+1, z_posicao);
+    //}
 
-    // 2. Move X até a posição alvo (com tolerância)
-    while (x_posicao < alvo.x - 1) step_x(+1, x_posicao);
-    while (x_posicao > alvo.x + 1) step_x(-1, x_posicao);
+    // 2. Move X
+    while (x_posicao < alvo.x - 1){ step_x(+1, x_posicao); wait_us(5);}
+    while (x_posicao > alvo.x + 1) {step_x(-1, x_posicao);wait_ms(5);}
 
-    // 3. Move Y até a posição alvo (com tolerância)
-    while (y_posicao < alvo.y - 1) step_y(+1, y_posicao);
-    while (y_posicao > alvo.y + 1) step_y(-1, y_posicao);
+    // 3. Move Y
+    while (y_posicao < alvo.y - 1) {step_y(+1, y_posicao);wait_ms(5);}
+    while (y_posicao > alvo.y + 1) {step_y(-1, y_posicao);wait_ms(5);}
 
-    // 4. Move Z até a posição desejada
-    // while (z_posicao < alvo.z - 1) step_z(+1, z_posicao);
-    // while (z_posicao > alvo.z + 1) step_z(-1, z_posicao);
+    // 4. Move Z até a altura da posição
+    //while (z_posicao < alvo.z - 1) step_z(+1, z_posicao);
+    //while (z_posicao > alvo.z + 1) step_z(-1, z_posicao);
 }
 
 // Executa o ciclo completo: coleta e dispensa volumes
@@ -112,22 +134,30 @@ void executar_ciclo(void) {
     }
 
     atualizar_t0("Executando ciclo...");
-    wait_ms(5000); // breve pausa para leitura da mensagem
+    wait_ms(1000); // pequena pausa inicial
 
     for (int i = 0; i < total_posicoes; ++i) {
         const Posicao &dispensa = posicoes[i];
         int volume_restante = dispensa.volume;
 
         while (volume_restante > 0) {
-            // 1. Vai para a posição de coleta
+            // Vai para a posição de coleta
             mover_para_posicao(posicao_coleta);
-            wait_ms(5000);  // tempo simulado de coleta
+            wait_ms(500);
 
-            // 2. Vai para a posição de dispensa
+            // Coleta
+            acionar_coleta();
+            wait_ms(500);
+
+            // Vai para a posição de dispensa
             mover_para_posicao(dispensa);
-            wait_ms(5000);  // tempo simulado de dispensa
+            wait_ms(500);
 
-            volume_restante--;  // cada ciclo transfere 1ml
+            // Dispensa
+            acionar_dispensa();
+            wait_ms(500);
+
+            volume_restante--;
         }
     }
 
