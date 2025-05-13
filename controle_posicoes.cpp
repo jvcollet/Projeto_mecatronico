@@ -113,35 +113,48 @@ static void mover_para_posicao(const Posicao &alvo) {
     //    wait_us(500);
     //}
 
+    // Declarando posições
+    bool x_ok = false;
+    bool y_ok = false;
+    // bool z_ok = false;
+    
     // 2. Move X
-    while (x_posicao < alvo.x - 1) {
-        step_x(+1, x_posicao);
-        wait_us(500);
-    }
-    while (x_posicao > alvo.x + 1) {
-        step_x(-1, x_posicao);
-        wait_us(500);
-    }
+    while (!x_ok || !y_ok){
+        while (x_posicao < alvo.x - 1) {
+            step_x(+1, x_posicao);
+            wait_us(500);
+            x_ok = true;
+        }
+        while (x_posicao > alvo.x + 1) {
+            step_x(-1, x_posicao);
+            wait_us(500);
+            x_ok = true;
+        }
 
-    // 3. Move Y
-    while (y_posicao < alvo.y - 1) {
-        step_y(+1, y_posicao);
-        wait_us(500);
-    }
-    while (y_posicao > alvo.y + 1) {
-        step_y(-1, y_posicao);
-        wait_us(500);
-    }
+        // 3. Move Y
+        while (y_posicao < alvo.y - 1) {
+            step_y(+1, y_posicao);
+            wait_us(500);
+            y_ok = true;
+        }
+        while (y_posicao > alvo.y + 1) {
+            step_y(-1, y_posicao);
+            wait_us(500);
+            y_ok = true;
+        }
+        if (y_posicao == alvo.y){ y_ok = true; }
+        if (x_posicao == alvo.x){ x_ok = true; }
 
-    // 4. Move Z até a altura da posição
-    //while (z_posicao < alvo.z - 1) {
-    //    step_z(+1, z_posicao);
-    //    wait_us(500);
-    //}
-    //while (z_posicao > alvo.z + 1) {
-    //    step_z(-1, z_posicao);
-    //    wait_us(500);
-    //}
+        // 4. Move Z até a altura da posição
+        //while (z_posicao < alvo.z - 1) {
+        //    step_z(+1, z_posicao);
+        //    wait_us(500);
+        //}
+        //while (z_posicao > alvo.z + 1) {
+        //    step_z(-1, z_posicao);
+        //    wait_us(500);
+        //}
+    }
 }
 
 // Executa o ciclo completo: coleta e dispensa volumes
