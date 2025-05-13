@@ -1,4 +1,3 @@
-// === controle_posicoes.cpp ===
 #include "mbed.h"
 #include "controle_posicoes.h"
 #include "nextion_interface.h"
@@ -111,19 +110,38 @@ static void mover_para_posicao(const Posicao &alvo) {
     // 1. Sobe o eixo Z até o máximo (por segurança)
     //while (zMax.read() == 1) {
     //    step_z(+1, z_posicao);
+    //    wait_us(500);
     //}
 
     // 2. Move X
-    while (x_posicao < alvo.x - 1){ step_x(+1, x_posicao); wait_us(5);}
-    while (x_posicao > alvo.x + 1) {step_x(-1, x_posicao);wait_ms(5);}
+    while (x_posicao < alvo.x - 1) {
+        step_x(+1, x_posicao);
+        wait_us(500);
+    }
+    while (x_posicao > alvo.x + 1) {
+        step_x(-1, x_posicao);
+        wait_us(500);
+    }
 
     // 3. Move Y
-    while (y_posicao < alvo.y - 1) {step_y(+1, y_posicao);wait_ms(5);}
-    while (y_posicao > alvo.y + 1) {step_y(-1, y_posicao);wait_ms(5);}
+    while (y_posicao < alvo.y - 1) {
+        step_y(+1, y_posicao);
+        wait_us(500);
+    }
+    while (y_posicao > alvo.y + 1) {
+        step_y(-1, y_posicao);
+        wait_us(500);
+    }
 
     // 4. Move Z até a altura da posição
-    //while (z_posicao < alvo.z - 1) step_z(+1, z_posicao);
-    //while (z_posicao > alvo.z + 1) step_z(-1, z_posicao);
+    //while (z_posicao < alvo.z - 1) {
+    //    step_z(+1, z_posicao);
+    //    wait_us(500);
+    //}
+    //while (z_posicao > alvo.z + 1) {
+    //    step_z(-1, z_posicao);
+    //    wait_us(500);
+    //}
 }
 
 // Executa o ciclo completo: coleta e dispensa volumes
@@ -141,6 +159,9 @@ void executar_ciclo(void) {
         int volume_restante = dispensa.volume;
 
         while (volume_restante > 0) {
+            char texto_1[32];
+            sprintf(texto_1, "Posicao %d - %dml restante", i + 1, volume_restante);
+            atualizar_t1(texto_1);
             // Vai para a posição de coleta
             mover_para_posicao(posicao_coleta);
             wait_ms(500);
