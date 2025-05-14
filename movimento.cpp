@@ -52,7 +52,7 @@ void step_y(int direction, int &pos) {
     DIR_Y    = (direction > 0) ? 1 : 0;
     pulso_step(CLK_Y);
     // lógico invertido:
-    pos += (direction > 0) ? -1 : +1;
+    pos += (direction < 0) ? -1 : +1;
 }
 
 

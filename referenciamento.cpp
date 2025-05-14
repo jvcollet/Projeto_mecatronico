@@ -1,6 +1,7 @@
 // referenciamento.cpp
 #include "mbed.h"
 #include "referenciamento.h"
+#include "nextion_interface.h"
 
 // funções de passo
 extern void step_x(int direction, int &pos);
@@ -28,6 +29,7 @@ void referenciar() {
     timer_z.start();
 
     while (!(x_ref_ok && y_ref_ok)) {
+
         // — EIXO X —
         if (!x_ref_ok) {
             if (!x_backoff_pending) {

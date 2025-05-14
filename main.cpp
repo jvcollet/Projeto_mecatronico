@@ -19,10 +19,10 @@ DigitalOut ENABLE_Y(PA_10, 0);  // enable ativo baixo
 BusOut MP3(D13, D14, D15, D15);
 
 // Sensores de fim de curso
-DigitalIn xMax(PB_9);
-DigitalIn xMin(PB_8);
-DigitalIn yMin(PA_11);
-DigitalIn yMax(PA_12);
+DigitalIn yMax(PB_9);  // X esquerda
+DigitalIn yMin(PB_8);  // Y direita
+DigitalIn xMin(PA_11); // Y longe
+DigitalIn xMax(PA_12); // Y perto
 DigitalIn zMin(D0);
 DigitalIn zMax(D1);
 
@@ -61,9 +61,9 @@ int main() {
     inicializar_pipetadora();
 
     // Ativa pull-ups internos nos sensores
-    xMin.mode(PullUp);  xMax.mode(PullUp);
-    yMin.mode(PullUp);  yMax.mode(PullUp);
-    zMin.mode(PullUp);  zMax.mode(PullUp);
+    // xMin.mode(PullUp);  xMax.mode(PullUp);
+    // yMin.mode(PullUp);  yMax.mode(PullUp);
+    // zMin.mode(PullUp);  zMax.mode(PullUp);
 
     // Estados de botões Nextion
     bool btn_iniciar = false;
