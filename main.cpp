@@ -19,10 +19,10 @@ DigitalOut ENABLE_Y(PA_10, 0);  // enable ativo baixo
 BusOut MP3(D13, D14, D15, D15);
 
 // Sensores de fim de curso
-DigitalIn yMax(PB_9);  // X esquerda
-DigitalIn yMin(PB_8);  // Y direita
-DigitalIn xMin(PA_11); // Y longe
-DigitalIn xMax(PA_12); // Y perto
+DigitalIn yMax(PB_9);  // Y 
+DigitalIn yMin(PB_8);  // Y 
+DigitalIn xMin(PA_11); // X
+DigitalIn xMax(PA_12); // X
 DigitalIn zMin(D0);
 DigitalIn zMax(D1);
 

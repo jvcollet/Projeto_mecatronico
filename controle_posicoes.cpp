@@ -143,11 +143,11 @@ static void mover_para_posicao(const Posicao &alvo) {
         }
 
         // Atualiza display a cada N passos para evitar lentidão
-        if (i % 50 == 0) {
-            char buffer[64];
-            sprintf(buffer, "Posicao- X: %d Y: %d", x_posicao, y_posicao);
-            atualizar_t2(buffer);
-        }
+        // if (i % 50 == 0) {
+        //     char buffer[64];
+        //     sprintf(buffer, "Posicao- X: %d Y: %d", x_posicao, y_posicao);
+        //     atualizar_t2(buffer);
+        // }
     }
 }
 
