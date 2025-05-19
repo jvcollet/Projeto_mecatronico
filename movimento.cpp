@@ -27,6 +27,7 @@ extern int y_posicao;
 extern int z_posicao;
 
 #define VELO_HOMING    200   // meio período de pulso (us)
+#define VELO_HOMING_Z    1200   // meio período de pulso (us)
 int x_posicao_max = 60000;
 int y_posicao_max = 60000;
 int z_posicao_max = 10000; // ajuste conforme necessidade
@@ -57,18 +58,19 @@ void step_y(int direction, int &pos) {
 
 void step_z(int direction, int &pos) {
     if (direction > 0) {
-        for (int i = 0; i < 4; ++i) {
-            MP3 = STEP_PATTERN[i];
-            wait_us(VELO_HOMING);
-        }
-        pos++;
-    } else {
         for (int i = 3; i >= 0; --i) {
             MP3 = STEP_PATTERN[i];
-            wait_us(VELO_HOMING);
+            wait_us(VELO_HOMING_Z);
         }
         pos--;
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            MP3 = STEP_PATTERN[i];
+            wait_us(VELO_HOMING_Z);
+        }
+        pos++;
     }
+    MP3 = 0;
 }
 
 // --- Controle contínuo via joystick para X e Y ---
@@ -116,35 +118,39 @@ void movimento_manual(int x_joystick, int y_joystick, bool manual) {
     }
 
     // X via joystick
-    if (x_joystick < 450 && x_posicao > 0) {
+    if (x_joystick < 400 && x_posicao < 0) {
         joystickMoveX = true;
         joystickDirX = 1;
-    } else if (x_joystick > 550 && x_posicao < x_posicao_max) {
+    } else if (x_joystick > 600 && x_posicao < x_posicao_max) {
         joystickMoveX = true;
         joystickDirX = 0;
     } else {
         joystickMoveX = false;
     }
-
     // Y via joystick
-    if (y_joystick > 550 && y_posicao < y_posicao_max) {
+    if (y_joystick > 600 && y_posicao < y_posicao_max) {
         joystickMoveY = true;
         joystickDirY = 1;
-    } else if (y_joystick < 450 && y_posicao > 0) {
+    } else if (y_joystick < 400 && y_posicao < 0) {
         joystickMoveY = true;
         joystickDirY = 0;
     } else {
         joystickMoveY = false;
     }
 
-    // Z via Nextion
-    bool zUp = false, zDown = false;
-    botao_z_cima(zUp);
-    botao_z_baixo(zDown);
+  // — Z via Nextion —
+bool zUp = false, zDown = false;
+botao_z_cima(zUp);   // zUp = true ao receber “ZUT”
+botao_z_baixo(zDown); // zDown = true ao receber “ZDT”
 
-    if (zUp && z_posicao < z_posicao_max && zMax.read()) {
-        step_z(+1, z_posicao);
-    } else if (zDown && z_posicao > 0 && zMin.read()) {
-        step_z(-1, z_posicao);
+// SUBIR
+if (zDown && z_posicao < z_posicao_max && zMax.read() == 1) {
+    step_z(+1, z_posicao);
+    zDown = false;  // limpa o flag
+    }
+// DESCER
+else if (zUp && z_posicao >= 0 && zMin.read() == 1) {
+    step_z(-1, z_posicao);
+    zUp = false; // limpa o flag
     }
 }

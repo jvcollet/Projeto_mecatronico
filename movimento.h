@@ -36,4 +36,7 @@ void step_x(int direction, int &pos);
 void step_y(int direction, int &pos);
 void step_z(int direction, int &pos);
 
+#define VELO_HOMING    200   // meio período de pulso (us)
+#define VELO_HOMING_Z    2000   // meio período de pulso (us)
+
 #endif // MOVIMENTO_H

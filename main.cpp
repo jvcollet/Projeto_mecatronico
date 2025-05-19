@@ -16,15 +16,20 @@ DigitalOut CLK_Y(PB_5);
 DigitalOut ENABLE_Y(PA_10, 0);  // enable ativo baixo
 
 // Motor Z via BusOut
-BusOut MP3(D13, D14, D15, D15);
+BusOut MP3(PB_2, PB_15, PB_1, PB_14);
+DigitalOut Fase_A(PB_2); // IN1
+DigitalOut Fase_B(PB_15); // IN2
+DigitalOut Fase_C(PB_1); // IN3
+DigitalOut Fase_D(PB_14); // IN4
+
 
 // Sensores de fim de curso
 DigitalIn yMax(PB_9);  // Y 
 DigitalIn yMin(PB_8);  // Y 
 DigitalIn xMin(PA_11); // X
 DigitalIn xMax(PA_12); // X
-DigitalIn zMin(D0);
-DigitalIn zMax(D1);
+DigitalIn zMin(PA_7);  // Z
+DigitalIn zMax(PB_6);  // Z
 
 // Contadores de posicao
 int x_posicao = 0;
@@ -42,7 +47,7 @@ DigitalIn emergencia(PC_7);
 
 //Acionamento pipeta
 DigitalIn mybutton(USER_BUTTON);
-DigitalOut pipetadora(D13); // Rele
+DigitalOut pipetadora(PA_6); // Rele
 
 // Comunicacao com Nextion (declarado em nextion_interface.cpp)
 extern Serial nextion;
@@ -63,19 +68,6 @@ int main() {
     iniciar_nextion();
     inicializar_pipetadora();
     
-    // Verifica emergência (botão ativo baixo)
-        if (emergencia.read() == 0) {
-            // Para todo movimento e exibe alerta
-            atualizar_t0("!!! EMERGENCIA !!!");
-            atualizar_t1("Sistema parado");
-            ENABLE_X = 1;
-            ENABLE_Y = 1;
-            while (true) {
-                // Piscar LED para sinalizar emergência
-                Led = !Led;
-                wait_ms(500);
-            }
-        }
     // Estados de botões Nextion
     bool btn_iniciar = false;
     bool btn_ok = false;
@@ -91,6 +83,20 @@ int main() {
     bool modo_manual = true; 
 
     while (true) {
+        // Verifica emergência (botão ativo baixo)
+        // if (emergencia.read() == 0) {
+        //     // Para todo movimento e exibe alerta
+        //     atualizar_t0("!!! EMERGENCIA !!!");
+        //     atualizar_t1("Sistema parado");
+        //     ENABLE_X = 1;
+        //     ENABLE_Y = 1;
+        //     MP3 = 0;
+        //     while (true) {
+        //         // Piscar LED para sinalizar emergência
+        //         Led = !Led;
+        //         wait_ms(500);
+        //     }
+        // }
        
         botao_referenciamento(referenciar_sistema);
 
@@ -103,7 +109,9 @@ int main() {
         if (referenciar_sistema) {
             atualizar_t0("Aguarde o refernciamento");
             atualizar_t1("Referenciando...");
-            referenciar();            
+            referenciar();
+
+            MP3 = 0;         
 
             atualizar_t0("Clique iniciar o sistema");
             atualizar_t1("Aguardando comando");
