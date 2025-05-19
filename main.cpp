@@ -1,90 +1,148 @@
+// === main.cpp ===
 #include "mbed.h"
+#include "movimento.h"
 #include "referenciamento.h"
+#include "controle_posicoes.h"
 #include "nextion_interface.h"
+#include "pipetadora.h"
 
-// Funções de passo
-extern void step_x(int direction, int &pos);
-extern void step_y(int direction, int &pos);
-extern void step_z(int direction, int &pos);
 
-// Sensores e posições
-extern DigitalIn xMin, xMax, yMin, yMax, zMin, zMax;
-extern int       x_posicao, y_posicao, z_posicao;
+// Drivers de passo para X e Y
+DigitalOut DIR_X(PB_10);
+DigitalOut CLK_X(PA_8);
+DigitalOut ENABLE_X(PB_4, 0);  // enable ativo baixo
+DigitalOut DIR_Y(PB_3);
+DigitalOut CLK_Y(PB_5);
+DigitalOut ENABLE_Y(PA_10, 0);  // enable ativo baixo
 
-#define BACKOFF_STEPS   2000
-#define STEP_DELAY_US   200
-#define WAIT_BACKOFF_MS 1000
+// Motor Z via BusOut
+BusOut MP3(D13, D14, D15, D15);
 
-Timer timer_x;
-Timer timer_y;
-Timer timer_z;
+// Sensores de fim de curso
+DigitalIn yMax(PB_9);  // Y 
+DigitalIn yMin(PB_8);  // Y 
+DigitalIn xMin(PA_11); // X
+DigitalIn xMax(PA_12); // X
+DigitalIn zMin(D0);
+DigitalIn zMax(D1);
 
-void referenciar() {
-    bool x_ref_ok = false, y_ref_ok = false, z_ref_ok = false;
-    bool x_backoff_pending = false, y_backoff_pending = false, z_backoff_pending = false;
+// Contadores de posicao
+int x_posicao = 0;
+int y_posicao = 0;
+int z_posicao = 0;
 
-    timer_x.start();
-    timer_y.start();
-    timer_z.start();
+// Controles adicionais
+DigitalOut Led(LED1);
+DigitalIn  botao(PC_13);
+AnalogIn   xAxis(PA_1);
+AnalogIn   yAxis(PA_0);
 
-    while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
-        // — EIXO X —
-        if (!x_ref_ok) {
-            if (!x_backoff_pending) {
-                if (xMax.read() == 1) {
-                    step_x(+1, x_posicao);
-                    wait_us(STEP_DELAY_US);
-                } else {
-                    x_backoff_pending = true;
-                    timer_x.reset();
-                }
-            } else if (timer_x.read_ms() >= WAIT_BACKOFF_MS) {
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_x(-1, x_posicao);
-                    wait_us(STEP_DELAY_US);
-                }
-                x_posicao = 0;
-                x_ref_ok = true;
+// Botao de emergencia
+DigitalIn emergencia(PC_7);
+
+//Acionamento pipeta
+DigitalIn mybutton(USER_BUTTON);
+DigitalOut pipetadora(D13); // Rele
+
+// Comunicacao com Nextion (declarado em nextion_interface.cpp)
+extern Serial nextion;
+extern char comando_atual[10];
+extern bool pronto_iniciar;
+
+extern int estado_interface;
+extern int total_dispensas;
+extern int volume_atual;
+extern int posicao_index;
+extern int total_posicoes;
+extern bool coleta_salva;
+
+
+
+int main() {
+    
+    iniciar_nextion();
+    inicializar_pipetadora();
+    
+    // Verifica emergência (botão ativo baixo)
+        if (emergencia.read() == 0) {
+            // Para todo movimento e exibe alerta
+            atualizar_t0("!!! EMERGENCIA !!!");
+            atualizar_t1("Sistema parado");
+            ENABLE_X = 1;
+            ENABLE_Y = 1;
+            while (true) {
+                // Piscar LED para sinalizar emergência
+                Led = !Led;
+                wait_ms(500);
             }
         }
+    // Estados de botões Nextion
+    bool btn_iniciar = false;
+    bool btn_ok = false;
+    bool btn_mais = false;
+    bool btn_menos = false;
+    bool referenciar_sistema = false;
 
-        // — EIXO Y —
-        if (!y_ref_ok) {
-            if (!y_backoff_pending) {
-                if (yMax.read() == 1) {
-                    step_y(+1, y_posicao);
-                    wait_us(STEP_DELAY_US);
-                } else {
-                    y_backoff_pending = true;
-                    timer_y.reset();
-                }
-            } else if (timer_y.read_ms() >= WAIT_BACKOFF_MS) {
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_y(-1, y_posicao);
-                    wait_us(STEP_DELAY_US);
-                }
-                y_posicao = 0;
-                y_ref_ok = true;
-            }
+    // Mensagens iniciais
+    atualizar_t0("Clique no botao de referenciar");
+    atualizar_t1("Sistema iniciado");
+    atualizar_t2("Posicoes ainda nao refernciadas");
+
+    bool modo_manual = true; 
+
+    while (true) {
+       
+        botao_referenciamento(referenciar_sistema);
+
+        int xv = xAxis.read() * 1000;
+        int yv = yAxis.read() * 1000;
+
+        movimento_manual(xv, yv, modo_manual);
+ 
+        
+        if (referenciar_sistema) {
+            atualizar_t0("Aguarde o refernciamento");
+            atualizar_t1("Referenciando...");
+            referenciar();            
+
+            atualizar_t0("Clique iniciar o sistema");
+            atualizar_t1("Aguardando comando");
+        
+            referenciar_sistema = false;
+            btn_iniciar = false;
+            btn_ok = false;
+            btn_mais = false;
+            btn_menos = false;
+            estado_interface = 0;
+            total_dispensas = 1;
+            volume_atual = 1;
+            posicao_index = 0;
+            coleta_salva = false;
+            pronto_iniciar = false;
         }
-
-        // — EIXO Z —
-        if (!z_ref_ok) {
-            if (!z_backoff_pending) {
-                if (zMax.read() == 1) {
-                    step_z(+1, z_posicao);
-                    wait_us(STEP_DELAY_US);
-                } else {
-                    z_backoff_pending = true;
-                    timer_z.reset();
-                }
-            } else if (timer_z.read_ms() >= WAIT_BACKOFF_MS) {
-                for (int i = 0; i < BACKOFF_STEPS; ++i) {
-                    step_z(-1, z_posicao);
-                    wait_us(STEP_DELAY_US);
-                }
-                z_posicao = 0;
-                z_ref_ok = true;
+        
+        // Formato para colocar a posição do X e Y
+        char buffer[64];
+        sprintf(buffer, "Posicao- X: %d Y: %d", x_posicao, y_posicao);
+        atualizar_t2(buffer);
+        
+        // Lógica da interface (controle_posicoes.cpp)
+        botao_iniciar_sistema(btn_iniciar);
+        if (btn_iniciar){
+            
+            botao_mais(btn_mais);
+            botao_menos(btn_menos);
+            botao_iniciar_sistema(btn_iniciar);
+            botao_ok(btn_ok);
+        
+            logica_interface_usuario(btn_iniciar, btn_mais, btn_menos, btn_ok);
+            wait_ms(100);
+            btn_ok = false;
+            btn_mais = false;
+            btn_menos = false;
+            referenciar_sistema = false;
+            if (pronto_iniciar){
+                executar_ciclo();
             }
         }
     }

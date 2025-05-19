@@ -1,19 +1,18 @@
-// referenciamento.cpp
 #include "mbed.h"
 #include "referenciamento.h"
 #include "nextion_interface.h"
 
-// funções de passo
+// Funções de passo
 extern void step_x(int direction, int &pos);
 extern void step_y(int direction, int &pos);
 extern void step_z(int direction, int &pos);
 
-// sensores e posições
+// Sensores e posições
 extern DigitalIn xMin, xMax, yMin, yMax, zMin, zMax;
 extern int       x_posicao, y_posicao, z_posicao;
 
-#define BACKOFF_STEPS 2000
-#define STEP_DELAY_US 200
+#define BACKOFF_STEPS   2000
+#define STEP_DELAY_US   200
 #define WAIT_BACKOFF_MS 1000
 
 Timer timer_x;
@@ -28,8 +27,7 @@ void referenciar() {
     timer_y.start();
     timer_z.start();
 
-    while (!(x_ref_ok && y_ref_ok)) {
-
+    while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
         // — EIXO X —
         if (!x_ref_ok) {
             if (!x_backoff_pending) {
@@ -38,7 +36,7 @@ void referenciar() {
                     wait_us(STEP_DELAY_US);
                 } else {
                     x_backoff_pending = true;
-                    timer_x.reset();  // inicia temporizador X
+                    timer_x.reset();
                 }
             } else if (timer_x.read_ms() >= WAIT_BACKOFF_MS) {
                 for (int i = 0; i < BACKOFF_STEPS; ++i) {
@@ -58,7 +56,7 @@ void referenciar() {
                     wait_us(STEP_DELAY_US);
                 } else {
                     y_backoff_pending = true;
-                    timer_y.reset();  // inicia temporizador Y
+                    timer_y.reset();
                 }
             } else if (timer_y.read_ms() >= WAIT_BACKOFF_MS) {
                 for (int i = 0; i < BACKOFF_STEPS; ++i) {
@@ -78,7 +76,7 @@ void referenciar() {
                     wait_us(STEP_DELAY_US);
                 } else {
                     z_backoff_pending = true;
-                    timer_z.reset();  // inicia temporizador Z
+                    timer_z.reset();
                 }
             } else if (timer_z.read_ms() >= WAIT_BACKOFF_MS) {
                 for (int i = 0; i < BACKOFF_STEPS; ++i) {
