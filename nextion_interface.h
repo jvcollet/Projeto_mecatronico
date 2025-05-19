@@ -21,8 +21,8 @@ void botao_ok(bool &variavel);
 
 
 // Funções para botão de movimentação do eixo Z (retornam true/false direto)
-bool botao_z_cima();   // true se comando == "ZUT"
-bool botao_z_baixo();  // true se comando == "ZDT"
+bool botao_z_cima(bool &variavel);   // true se comando == "ZUT"
+bool botao_z_baixo(bool &variavel);  // true se comando == "ZDT"
 
 // Funções de comunicação com o Nextion
 void enviar_texto_nextion(const char* componente, const char* texto);

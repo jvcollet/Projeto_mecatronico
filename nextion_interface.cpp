@@ -131,14 +131,20 @@ void botao_menos(bool &variavel) {
     }
 }
 
-bool botao_z_cima() {
-    return IS_CMD(comando_atual, "ZUT");
-    strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
+bool botao_z_cima(bool &variavel) {
+    if (IS_CMD(comando_atual, "ZUT")) {variavel = true;};
+    if (IS_CMD(comando_atual, "ZUR")) {
+        variavel = false;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
+        };
 }
 
-bool botao_z_baixo() {
-    return IS_CMD(comando_atual, "ZDT");
-    strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
+bool botao_z_baixo(bool & variavel) {
+    if (IS_CMD(comando_atual, "ZDT")) {variavel = true;};
+    if (IS_CMD(comando_atual, "ZDR")) {
+        variavel = false;
+        strcpy(comando_atual, "XXX"); // LIMPA O COMANDO AQUI
+        };
 }
 
 
