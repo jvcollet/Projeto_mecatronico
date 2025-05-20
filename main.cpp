@@ -131,8 +131,6 @@ int main() {
         
         // Formato para colocar a posição do X e Y
         char buffer[64];
-        sprintf(buffer, "Posicao- X: %d Y: %d", x_posicao, y_posicao);
-        atualizar_t2(buffer);
         
         // Lógica da interface (controle_posicoes.cpp)
         botao_iniciar_sistema(btn_iniciar);
@@ -144,7 +142,7 @@ int main() {
             botao_ok(btn_ok);
         
             logica_interface_usuario(btn_iniciar, btn_mais, btn_menos, btn_ok);
-            wait_ms(100);
+            wait_us(100);
             btn_ok = false;
             btn_mais = false;
             btn_menos = false;

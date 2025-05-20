@@ -10,6 +10,7 @@ void salvar_posicao(float x_atual, float y_atual, float z_atual) {
         posicao_coleta.y = y_atual;
         posicao_coleta.z = z_atual;
         coleta_salva = true;
+        // Atualiza Nextion ao clicar OK
         atualizar_t0("Selecione a posicao e o volume e precione em OK");
         char texto_1[32];
         sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
@@ -25,11 +26,13 @@ void salvar_posicao(float x_atual, float y_atual, float z_atual) {
         if (total_posicoes < total_dispensas) {
             posicao_index++;
             volume_atual = 1;
+            // Atualiza Nextion ao clicar OK
             atualizar_t0("Selecione a posicao e o volume e precione em OK");
             char texto_1[32];
             sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
             atualizar_t1(texto_1);
         } else {
+            // Atualiza Nextion ao clicar OK
             atualizar_t0("Ciclo OK para iniciar o sistema");
             atualizar_t1("Pressione OK para executar");
             pronto_iniciar = true;
@@ -41,6 +44,7 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
     switch (estado_interface) {
         case 0:
             if (iniciar_sistema) {
+                // Atualiza Nextion ao clicar iniciar
                 atualizar_t0("Selecione o numero de dispensas e clique em OK");
                 char texto_1[32];
                 sprintf(texto_1, "Numero de dispensas: %d", total_dispensas);
@@ -53,11 +57,13 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
             if (mais && total_dispensas < MAX_POSICOES) total_dispensas++;
             if (menos && total_dispensas > 1) total_dispensas--;
             if (mais || menos) {
+                // Atualiza Nextion ao clicar + ou -
                 char texto_1[32];
                 sprintf(texto_1, "Numero de dispensas: %d", total_dispensas);
                 atualizar_t1(texto_1);
             }
             if (ok) {
+                // Atualiza Nextion ao clicar OK
                 atualizar_t0("Selecione a posicao de coleta");
                 atualizar_t1("Clique em OK na posicao");
                 estado_interface = 2;
@@ -69,9 +75,16 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
             break;
 
         case 3:
-            if (mais) volume_atual++;
-            if (menos && volume_atual > 1) volume_atual--;
-            if (mais || menos) {
+            if (mais) {
+                volume_atual++;
+                // Atualiza Nextion ao clicar +
+                char texto_1[32];
+                sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
+                atualizar_t1(texto_1);
+            }
+            if (menos && volume_atual > 1) {
+                volume_atual--;
+                // Atualiza Nextion ao clicar -
                 char texto_1[32];
                 sprintf(texto_1, "Posicao %d - %dml", posicao_index + 1, volume_atual);
                 atualizar_t1(texto_1);
@@ -81,6 +94,7 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
                 if (!pronto_iniciar) {
                     salvar_posicao(x_posicao, y_posicao, z_posicao);
                 } else {
+                    // Atualiza Nextion ao clicar OK para iniciar ciclo
                     atualizar_t0("Iniciando ciclo...");
                     wait_us(500);
                     executar_ciclo();
@@ -94,6 +108,7 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
                     coleta_salva = false;
                     pronto_iniciar = false;
 
+                    // Atualiza Nextion após ciclo
                     atualizar_t0("Clique iniciar para novo ciclo");
                     atualizar_t1("Aguardando comando...");
                 }
@@ -105,53 +120,54 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
     }
 }
 
-// Função auxiliar: move rapidamente até a posição alvo
+// Função auxiliar: move rapidamente até a posição alvo (X, Y e Z)
 static void mover_para_posicao(const Posicao &alvo) {
     const int delay_us = 200;
 
     int dx = alvo.x - x_posicao;
     int dy = alvo.y - y_posicao;
+    int dz = alvo.z - z_posicao;
 
     int dir_x = (dx > 0) ? +1 : -1;
     int dir_y = (dy > 0) ? +1 : -1;
+    int dir_z = (dz > 0) ? +1 : -1;
+
     dx = abs(dx);
     dy = abs(dy);
+    dz = abs(dz);
 
-    int passos_x = dx;
-    int passos_y = dy;
+    int passos_totais = dx;
+    if (dy > passos_totais) passos_totais = dy;
+    if (dz > passos_totais) passos_totais = dz;
 
-    int passos_totais = (dx > dy) ? dx : dy;
-
-    int erro_x = 0;
-    int erro_y = 0;
+    int erro_x = 0, erro_y = 0, erro_z = 0;
 
     for (int i = 0; i < passos_totais; i++) {
-        if (passos_x > 0) {
+        if (dx > 0) {
             erro_x += dx;
             if (erro_x >= passos_totais) {
                 step_x(dir_x, x_posicao);
                 erro_x -= passos_totais;
             }
         }
-
-        if (passos_y > 0) {
+        if (dy > 0) {
             erro_y += dy;
             if (erro_y >= passos_totais) {
                 step_y(dir_y, y_posicao);
                 erro_y -= passos_totais;
             }
         }
+        if (dz > 0) {
+            erro_z += dz;
+            if (erro_z >= passos_totais) {
+                step_z(dir_z, z_posicao);
+                erro_z -= passos_totais;
+            }
+        }
 
-        // Atualiza display a cada N passos para evitar lentidão
-        // if (i % 50 == 0) {
-        //     char buffer[64];
-        //     sprintf(buffer, "Posicao- X: %d Y: %d", x_posicao, y_posicao);
-        //     atualizar_t2(buffer);
-        // }
+        // Removida atualização contínua no Nextion para não impactar Z
     }
 }
-
-
 
 // Executa o ciclo completo: coleta e dispensa volumes
 void executar_ciclo(void) {

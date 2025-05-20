@@ -27,10 +27,10 @@ extern int y_posicao;
 extern int z_posicao;
 
 #define VELO_HOMING    200   // meio período de pulso (us)
-#define VELO_HOMING_Z    1200   // meio período de pulso (us)
+#define VELO_HOMING_Z    3000   // meio período de pulso (us)
 int x_posicao_max = 60000;
 int y_posicao_max = 60000;
-int z_posicao_max = 10000; // ajuste conforme necessidade
+int z_posicao_max = -1200; // ajuste conforme necessidade
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
 
 // --- Função de pulso para X e Y ---
@@ -144,13 +144,14 @@ botao_z_cima(zUp);   // zUp = true ao receber “ZUT”
 botao_z_baixo(zDown); // zDown = true ao receber “ZDT”
 
 // SUBIR
-if (zUp && z_posicao <= 0  && zMax.read() == 1) {
+if (zDown && zMax.read() == 1 && z_posicao > z_posicao_max) {
     step_z(+1, z_posicao);  // mover para cima
-    zUp = false;            // limpa o flag
+    zDown = false;            // limpa o flag
     }
 // DESCER
-else if (zDown && z_posicao > z_posicao_max && zMin.read() == 1) {
+else if (zUp && zMin.read() == 1 && z_posicao <= 0) {
     step_z(-1, z_posicao);  // mover para baixo
-    zDown = false;          // limpa o flag
+    zUp = false;          // limpa o flag
     }
 }
+// // && z_posicao <= 0

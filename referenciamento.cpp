@@ -15,7 +15,7 @@ extern int       x_posicao, y_posicao, z_posicao;
 #define BACKOFF_STEPS   2000
 #define STEP_DELAY_US   200
 #define WAIT_BACKOFF_MS 500
-#define BACKOFF_STEPS_Z   100
+#define BACKOFF_STEPS_Z   150
 
 
 Timer timer_x;
@@ -32,7 +32,7 @@ void referenciar() {
 
     while (!(x_ref_ok && y_ref_ok && z_ref_ok && z_ref_ok)) {
         // — EIXO X —
-        if (!x_ref_ok) {
+        if (!x_ref_ok && z_ref_ok) {
             if (!x_backoff_pending) {
                 if (xMax.read() == 1) {
                     step_x(+1, x_posicao);
@@ -52,7 +52,7 @@ void referenciar() {
         }
 
         // — EIXO Y —
-        if (!y_ref_ok) {
+        if (!y_ref_ok && z_ref_ok) {
             if (!y_backoff_pending) {
                 if (yMax.read() == 1) {
                     step_y(+1, y_posicao);
