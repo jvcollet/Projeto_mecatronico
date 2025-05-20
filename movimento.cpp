@@ -144,13 +144,13 @@ botao_z_cima(zUp);   // zUp = true ao receber “ZUT”
 botao_z_baixo(zDown); // zDown = true ao receber “ZDT”
 
 // SUBIR
-if (zDown && z_posicao < z_posicao_max && zMax.read() == 1) {
-    step_z(+1, z_posicao);
-    zDown = false;  // limpa o flag
+if (zUp && z_posicao <= 0  && zMax.read() == 1) {
+    step_z(+1, z_posicao);  // mover para cima
+    zUp = false;            // limpa o flag
     }
 // DESCER
-else if (zUp && z_posicao >= 0 && zMin.read() == 1) {
-    step_z(-1, z_posicao);
-    zUp = false; // limpa o flag
+else if (zDown && z_posicao > z_posicao_max && zMin.read() == 1) {
+    step_z(-1, z_posicao);  // mover para baixo
+    zDown = false;          // limpa o flag
     }
 }
