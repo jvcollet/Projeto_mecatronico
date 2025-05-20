@@ -129,9 +129,7 @@ int main() {
             pronto_iniciar = false;
         }
         
-        // Formato para colocar a posição do X e Y
-        char buffer[64];
-        
+    
         // Lógica da interface (controle_posicoes.cpp)
         botao_iniciar_sistema(btn_iniciar);
         if (btn_iniciar){
