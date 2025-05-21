@@ -28,6 +28,7 @@ extern int x_posicao;
 extern int y_posicao;
 extern int z_posicao;
 
+
 // Função para movimentar motores usando o joystick
 void movimento_manual(int x_joystick, int y_joystick, bool manual);
 
@@ -35,6 +36,10 @@ void movimento_manual(int x_joystick, int y_joystick, bool manual);
 void step_x(int direction, int &pos);
 void step_y(int direction, int &pos);
 void step_z(int direction, int &pos);
+
+extern int x_posicao_max;
+extern int y_posicao_max;
+extern int z_posicao_max;
 
 #define VELO_HOMING    200   // meio período de pulso (us)
 #define VELO_HOMING_Z    2000   // meio período de pulso (us)

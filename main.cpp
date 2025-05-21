@@ -41,6 +41,7 @@ DigitalOut Led(LED1);
 DigitalIn  botao(PC_13);
 AnalogIn   xAxis(PA_1);
 AnalogIn   yAxis(PA_0);
+DigitalOut  buzzer(PA_4);
 
 // Botao de emergencia
 DigitalIn emergencia(PC_7);
@@ -84,19 +85,21 @@ int main() {
 
     while (true) {
         // Verifica emergência (botão ativo baixo)
-        // if (emergencia.read() == 0) {
-        //     // Para todo movimento e exibe alerta
-        //     atualizar_t0("!!! EMERGENCIA !!!");
-        //     atualizar_t1("Sistema parado");
-        //     ENABLE_X = 1;
-        //     ENABLE_Y = 1;
-        //     MP3 = 0;
-        //     while (true) {
-        //         // Piscar LED para sinalizar emergência
-        //         Led = !Led;
-        //         wait_ms(500);
-        //     }
-        // }
+        if (emergencia.read() == 0) {
+            // Para todo movimento e exibe alerta
+            atualizar_t0("!!! EMERGÊNCIA !!!");
+            atualizar_t1("Sistema parado - reiniciando...");
+            ENABLE_X = 1;
+            ENABLE_Y = 1;
+            MP3 = 0;
+            buzzer = 1;
+
+            // Pequena espera para o usuário ver a mensagem
+            wait_ms(10000);  
+
+            // Reinicia o sistema
+            NVIC_SystemReset();
+        }
        
         botao_referenciamento(referenciar_sistema);
 
