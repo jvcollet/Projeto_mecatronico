@@ -123,7 +123,7 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
 }
 
 static void mover_para_posicao(const Posicao &alvo) {
-    const int delay_us = 100;
+    const int delay_us = 200;
 
     // 1) Elevar Z até o topo (fim de curso superior)
     while (z_posicao < 0 && zMin.read() == 1) {
