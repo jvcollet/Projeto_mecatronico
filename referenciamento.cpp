@@ -30,7 +30,7 @@ void referenciar() {
     timer_y.start();
     timer_z.start();
 
-    while (!(x_ref_ok && y_ref_ok && z_ref_ok && z_ref_ok)) {
+    while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
         // — EIXO X —
         if (!x_ref_ok && z_ref_ok) {
             if (!x_backoff_pending) {

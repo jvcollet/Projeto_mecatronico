@@ -6,6 +6,9 @@
 #include "nextion_interface.h"
 #include "pipetadora.h"
 
+// Reinicialização automática após energização (apenas uma vez)
+#define BOOT_FLAG_MAGIC 0xDEADBEEF
+volatile uint32_t *boot_flag = (uint32_t *)0x2001FFF0;  // endereço livre na SRAM
 
 // Drivers de passo para X e Y
 DigitalOut DIR_X(PB_10);
@@ -65,7 +68,14 @@ extern bool coleta_salva;
 
 
 int main() {
-    
+        // --- Reinicialização automática no primeiro boot ---
+    if (*boot_flag != BOOT_FLAG_MAGIC) {
+        *boot_flag = BOOT_FLAG_MAGIC;
+        wait_ms(200);              // tempo para periféricos estabilizarem
+        NVIC_SystemReset();        // reinicia a placa
+    }
+    *boot_flag = 0;  // limpa flag para não entrar em loop
+
     iniciar_nextion();
     inicializar_pipetadora();
     
