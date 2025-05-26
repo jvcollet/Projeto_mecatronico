@@ -10,12 +10,12 @@ void inicializar_pipetadora() {
 
 void acionar_coleta() {
     rele_pipeta = 0;
-    wait_ms(500); // Tempo de sucção
+    wait_ms(200); // Tempo de sucção
     rele_pipeta = 1;
 }
 
 void acionar_dispensa() {
     rele_pipeta = 0;
-    wait_ms(500); // Tempo de sucção
+    wait_ms(200); // Tempo de sucção
     rele_pipeta = 1;
 }

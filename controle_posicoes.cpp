@@ -189,16 +189,16 @@ void executar_ciclo(bool btn_iniciar) {
             atualizar_t1(texto_1);
 
             mover_para_posicao(posicao_coleta);
-            wait_ms(1000);
+            wait_ms(2000);
 
             acionar_coleta();
-            wait_ms(1000);
+            wait_ms(2000);
 
             mover_para_posicao(dispensa);
-            wait_ms(1000);
+            wait_ms(2000);
 
             acionar_dispensa();
-            wait_ms(1000);
+            wait_ms(2000);
 
             volume_restante--;
         }
