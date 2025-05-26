@@ -168,6 +168,7 @@ static void mover_para_posicao(const Posicao &alvo) {
 
 // Executa o ciclo completo: coleta e dispensa volumes
 void executar_ciclo(void) {
+    const int delay_us = 200;
     if (!coleta_salva) {
         atualizar_t0("Posicao de coleta nao definida.");
         return;
@@ -200,6 +201,14 @@ void executar_ciclo(void) {
             volume_restante--;
         }
     }
+    
+    while (z_posicao < 0 && zMin.read() == 1) {
+        step_z(-1, z_posicao);
+        wait_us(delay_us);
+    }
 
     atualizar_t0("Ciclo finalizado.");
+    buzzer = 1;
+    wait_ms(3000); // tempo para o operador ver o alerta
+    NVIC_SystemReset();
 }

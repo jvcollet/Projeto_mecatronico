@@ -31,8 +31,8 @@ extern int z_posicao;
 
 #define VELO_HOMING    200   // meio período de pulso (us)
 #define VELO_HOMING_Z    3000   // meio período de pulso (us)
-int x_posicao_max = 5000;
-int y_posicao_max = 5000;
+int x_posicao_max = -42500;
+int y_posicao_max = -41000;
 int z_posicao_max = -1225; // ajuste conforme necessidade
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
  
@@ -116,24 +116,24 @@ void movimento_manual(int x_joystick, int y_joystick, bool manual) {
     if (!manual) return;
 
  if (!joystickTickerStarted) {
-    tickerX.attach_us(&pulso_joystick_X, 450);
-    tickerY.attach_us(&pulso_joystick_Y, 450);
+    tickerX.attach_us(&pulso_joystick_X, 300);
+    tickerY.attach_us(&pulso_joystick_Y, 300);
     joystickTickerStarted = true;
 
 }
 
     // X via joystick
-    if (x_joystick < 400 && x_posicao < 0 && xMin.read() == 1) {
+    if (x_joystick < 400 && x_posicao < 0 && xMax.read() == 1) {
         joystickMoveX = true;
         joystickDirX = 1;
-    } else if (x_joystick > 600 && x_posicao < x_posicao_max && xMax.read() == 1) {
+    } else if (x_joystick > 600 && x_posicao > x_posicao_max && xMin.read() == 1) {
         joystickMoveX = true;
         joystickDirX = 0;
     } else {
         joystickMoveX = false;
     }
     // Y via joystick
-    if (y_joystick > 600 && y_posicao < y_posicao_max && yMin.read() == 1) {
+    if (y_joystick > 600 && y_posicao > y_posicao_max && yMin.read() == 1) {
         joystickMoveY = true;
         joystickDirY = 1;
     } else if (y_joystick < 400 && y_posicao < 0 && yMax.read() == 1) {
