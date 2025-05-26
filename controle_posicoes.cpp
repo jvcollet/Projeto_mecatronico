@@ -3,6 +3,7 @@
 #include "nextion_interface.h"
 #include "pipetadora.h"
 #include "movimento.h"
+extern DigitalOut buzzer;
 
 
 // Salva uma nova posição
