@@ -84,7 +84,7 @@ int main() {
     // Mensagens iniciais
     atualizar_t0("Clique no botao de referenciar");
     atualizar_t1("Sistema iniciado");
-    atualizar_t2("Posicoes ainda nao referenciadas");
+    atualizar_t2("Posicoes nao referenciadas");
 
     bool modo_manual = true; 
 
@@ -100,8 +100,8 @@ int main() {
         xv = xAxis.read() * 1000;
         yv = yAxis.read() * 1000;
 
-        movimento_manual(xv, yv, modo_manual);
- 
+        movimento_manual(yv, xv, modo_manual);
+        
         
         if (referenciar_sistema) {
             atualizar_t0("Aguarde o referenciamento");
@@ -143,7 +143,8 @@ int main() {
             btn_menos = false;
             referenciar_sistema = false;
             if (pronto_iniciar){
-                executar_ciclo();
+                executar_ciclo(btn_iniciar);
+                
             }
         }
     }

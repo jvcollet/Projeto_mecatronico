@@ -18,6 +18,7 @@ extern int       x_posicao, y_posicao, z_posicao;
 #define STEP_DELAY_US   200
 #define WAIT_BACKOFF_MS 500
 #define BACKOFF_STEPS_Z   50
+#define STEP_DELAY_US_BK 200
 
 
 Timer timer_x;
@@ -48,7 +49,7 @@ void referenciar() {
             } else if (timer_x.read_ms() >= WAIT_BACKOFF_MS) {
                 for (int i = 0; i < BACKOFF_STEPS; ++i) {
                     step_x(-1, x_posicao);
-                    wait_us(STEP_DELAY_US);
+                    wait_us(STEP_DELAY_US_BK);
                 }
                 x_posicao = 0;
                 x_ref_ok = true;
@@ -68,7 +69,7 @@ void referenciar() {
             } else if (timer_y.read_ms() >= WAIT_BACKOFF_MS) {
                 for (int i = 0; i < BACKOFF_STEPS; ++i) {
                     step_y(-1, y_posicao);
-                    wait_us(STEP_DELAY_US);
+                    wait_us(STEP_DELAY_US_BK);
                 }
                 y_posicao = 0;
                 y_ref_ok = true;
@@ -88,7 +89,7 @@ void referenciar() {
             } else if (timer_z.read_ms() >= WAIT_BACKOFF_MS) {
                 for (int i = 0; i < BACKOFF_STEPS_Z; ++i) {
                     step_z(+1, z_posicao);
-                    wait_us(VELO_HOMING_Z);
+                    wait_us(STEP_DELAY_US_BK);
                 }
                 z_posicao = 0;
                 z_ref_ok = true;

@@ -32,7 +32,7 @@ extern int z_posicao;
 #define VELO_HOMING    200   // meio período de pulso (us)
 #define VELO_HOMING_Z    3000   // meio período de pulso (us)
 int x_posicao_max = -42500;
-int y_posicao_max = -41000;
+int y_posicao_max = 41000;
 int z_posicao_max = -1225; // ajuste conforme necessidade
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
  
@@ -115,47 +115,35 @@ static volatile bool zNextionDown = false;
 void movimento_manual(int x_joystick, int y_joystick, bool manual) {
     if (!manual) return;
 
- if (!joystickTickerStarted) {
-    tickerX.attach_us(&pulso_joystick_X, 300);
-    tickerY.attach_us(&pulso_joystick_Y, 300);
-    joystickTickerStarted = true;
-
-}
-
     // X via joystick
     if (x_joystick < 400 && x_posicao < 0 && xMax.read() == 1) {
-        joystickMoveX = true;
-        joystickDirX = 1;
+        step_x(+1, x_posicao);  // mover para esquerda
+        wait_us(10);
     } else if (x_joystick > 600 && x_posicao > x_posicao_max && xMin.read() == 1) {
-        joystickMoveX = true;
-        joystickDirX = 0;
-    } else {
-        joystickMoveX = false;
+        step_x(-1, x_posicao);  // mover para direita
+        wait_us(10);
     }
+
     // Y via joystick
-    if (y_joystick > 600 && y_posicao > y_posicao_max && yMin.read() == 1) {
-        joystickMoveY = true;
-        joystickDirY = 1;
+    if (y_joystick > 600 && y_posicao < y_posicao_max && yMin.read() == 1) {
+        step_y(-1, y_posicao);  // mover para frente
+        wait_us(10);
     } else if (y_joystick < 400 && y_posicao < 0 && yMax.read() == 1) {
-        joystickMoveY = true;
-        joystickDirY = 0;
-    } else {
-        joystickMoveY = false;
+        step_y(+1, y_posicao);  // mover para trás
+        wait_us(10);
     }
 
-  // — Z via Nextion —
-bool zUp = false, zDown = false;
-botao_z_cima(zUp);   // zUp = true ao receber “ZUT”
-botao_z_baixo(zDown); // zDown = true ao receber “ZDT”
+    // Z via Nextion
+    bool zUp = false, zDown = false;
+    botao_z_cima(zUp);   // zUp = true ao receber “ZUT”
+    botao_z_baixo(zDown); // zDown = true ao receber “ZDT”
 
-// SUBIR
-if (zDown && zMax.read() == 1 && z_posicao > z_posicao_max) {
-    step_z(+1, z_posicao);  // mover para cima
-    zDown = false;            // limpa o flag
+    // SUBIR
+    if (zDown && zMax.read() == 1 && z_posicao > z_posicao_max) {
+        step_z(+1, z_posicao);
     }
-// DESCER
-else if (zUp && zMin.read() == 1 && z_posicao <= 0) {
-    step_z(-1, z_posicao);  // mover para baixo
-    zUp = false;          // limpa o flag
+    // DESCER
+    else if (zUp && zMin.read() == 1 && z_posicao <= 0) {
+        step_z(-1, z_posicao);
     }
 }

@@ -42,6 +42,6 @@ void salvar_posicao(float x_atual, float y_atual, float z_atual);
 // Lógica da interface baseada nos botões
 void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool ok);
 
-void executar_ciclo(void);
+void executar_ciclo(bool btn_iniciar);
 
 #endif // CONTROLE_POSICOES_H

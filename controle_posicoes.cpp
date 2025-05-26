@@ -6,6 +6,7 @@
 extern DigitalOut buzzer;
 
 
+
 // Salva uma nova posição
 void salvar_posicao(float x_atual, float y_atual, float z_atual) {
     if (estado_interface == 2 && !coleta_salva) {
@@ -100,7 +101,7 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
                     // Atualiza Nextion ao clicar OK para iniciar ciclo
                     atualizar_t0("Iniciando ciclo...");
                     wait_us(500);
-                    executar_ciclo();
+                    executar_ciclo(iniciar_sistema);
 
                     // Reset após o ciclo
                     estado_interface = 0;
@@ -124,7 +125,7 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
 }
 
 static void mover_para_posicao(const Posicao &alvo) {
-    const int delay_us = 200;
+    const int delay_us = 100;
 
     // 1) Elevar Z até o topo (fim de curso superior)
     while (z_posicao < 0 && zMin.read() == 1) {
@@ -168,7 +169,7 @@ static void mover_para_posicao(const Posicao &alvo) {
 
 
 // Executa o ciclo completo: coleta e dispensa volumes
-void executar_ciclo(void) {
+void executar_ciclo(bool btn_iniciar) {
     const int delay_us = 200;
     if (!coleta_salva) {
         atualizar_t0("Posicao de coleta nao definida.");
@@ -188,16 +189,16 @@ void executar_ciclo(void) {
             atualizar_t1(texto_1);
 
             mover_para_posicao(posicao_coleta);
-            wait_ms(500);
+            wait_ms(1000);
 
             acionar_coleta();
-            wait_ms(500);
+            wait_ms(1000);
 
             mover_para_posicao(dispensa);
-            wait_ms(500);
+            wait_ms(1000);
 
             acionar_dispensa();
-            wait_ms(500);
+            wait_ms(1000);
 
             volume_restante--;
         }
@@ -211,5 +212,18 @@ void executar_ciclo(void) {
     atualizar_t0("Ciclo finalizado.");
     buzzer = 1;
     wait_ms(3000); // tempo para o operador ver o alerta
-    NVIC_SystemReset();
+    buzzer = 0;
+
+    // Reset apenas das variáveis de controle
+    estado_interface = 0;
+    total_dispensas = 1;
+    volume_atual = 1;
+    posicao_index = 0;
+    total_posicoes = 0;
+    coleta_salva = false;
+    pronto_iniciar = false;
+
+    // Atualiza display informando que novo ciclo pode ser iniciado
+    atualizar_t0("Clique iniciar para novo ciclo");
+    atualizar_t1("Aguardando comando...");
 }
