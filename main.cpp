@@ -112,6 +112,7 @@ int main() {
 
             atualizar_t0("Clique iniciar o sistema");
             atualizar_t1("Aguardando comando");
+            atualizar_t2("Sistema referenciado");
         
             referenciar_sistema = false;
             btn_iniciar = false;

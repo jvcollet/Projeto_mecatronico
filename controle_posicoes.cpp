@@ -3,12 +3,14 @@
 #include "nextion_interface.h"
 #include "pipetadora.h"
 #include "movimento.h"
+#include "emergencia.h"
 extern DigitalOut buzzer;
 
 
 
 // Salva uma nova posição
 void salvar_posicao(float x_atual, float y_atual, float z_atual) {
+    checar_emergencia_com_reset();
     if (estado_interface == 2 && !coleta_salva) {
         posicao_coleta.x = x_atual;
         posicao_coleta.y = y_atual;
@@ -45,14 +47,17 @@ void salvar_posicao(float x_atual, float y_atual, float z_atual) {
 }
 
 void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool ok) {
+    checar_emergencia_com_reset();
     switch (estado_interface) {
         case 0:
+
             if (iniciar_sistema) {
                 // Atualiza Nextion ao clicar iniciar
                 atualizar_t0("Selecione o numero de dispensas e clique em OK");
                 char texto_1[32];
                 sprintf(texto_1, "Numero de dispensas: %d", total_dispensas);
                 atualizar_t1(texto_1);
+                atualizar_t2("Confirme clicando em OK");
                 estado_interface = 1;
             }
             break;
@@ -70,6 +75,7 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
                 // Atualiza Nextion ao clicar OK
                 atualizar_t0("Selecione a posicao de coleta");
                 atualizar_t1("Clique em OK na posicao");
+                atualizar_t2("Coletando posicao...");
                 estado_interface = 2;
             }
             break;
@@ -99,7 +105,8 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
                     salvar_posicao(x_posicao, y_posicao, z_posicao);
                 } else {
                     // Atualiza Nextion ao clicar OK para iniciar ciclo
-                    atualizar_t0("Iniciando ciclo...");
+                    atualizar_t0("Ciclo iniciado, aguarde...");
+                    atualizar_t2("Realizando ciclo...");
                     wait_us(500);
                     executar_ciclo(iniciar_sistema);
 
@@ -125,10 +132,12 @@ void logica_interface_usuario(bool iniciar_sistema, bool mais, bool menos, bool 
 }
 
 static void mover_para_posicao(const Posicao &alvo) {
+    checar_emergencia_com_reset();
     const int delay_us = 100;
 
     // 1) Elevar Z até o topo (fim de curso superior)
     while (z_posicao < 0 && zMin.read() == 1) {
+        checar_emergencia_com_reset();
         step_z(-1, z_posicao);
         wait_us(delay_us);
     }
@@ -143,6 +152,7 @@ static void mover_para_posicao(const Posicao &alvo) {
     int erro_x = 0, erro_y = 0;
 
     for (int i = 0; i < passos_xy; i++) {
+        checar_emergencia_com_reset();
         if (dx > 0) {
             erro_x += dx;
             if (erro_x >= passos_xy) {
@@ -162,6 +172,7 @@ static void mover_para_posicao(const Posicao &alvo) {
 
     // 3) Descer Z até a altura desejada
     while (z_posicao > alvo.z && zMin.read()) {
+        checar_emergencia_com_reset();
         step_z(+1, z_posicao);
         wait_us(delay_us);
     }
@@ -170,20 +181,22 @@ static void mover_para_posicao(const Posicao &alvo) {
 
 // Executa o ciclo completo: coleta e dispensa volumes
 void executar_ciclo(bool btn_iniciar) {
+    checar_emergencia_com_reset();
     const int delay_us = 200;
     if (!coleta_salva) {
         atualizar_t0("Posicao de coleta nao definida.");
         return;
     }
 
-    atualizar_t0("Executando ciclo...");
     wait_ms(1000);
 
     for (int i = 0; i < total_posicoes; ++i) {
+        checar_emergencia_com_reset();
         const Posicao &dispensa = posicoes[i];
         int volume_restante = dispensa.volume;
 
         while (volume_restante > 0) {
+            checar_emergencia_com_reset();
             char texto_1[32];
             sprintf(texto_1, "Posicao %d - %dml restante", i + 1, volume_restante);
             atualizar_t1(texto_1);
@@ -205,6 +218,7 @@ void executar_ciclo(bool btn_iniciar) {
     }
     
     while (z_posicao < 0 && zMin.read() == 1) {
+        checar_emergencia_com_reset();
         step_z(-1, z_posicao);
         wait_us(delay_us);
     }
@@ -224,6 +238,7 @@ void executar_ciclo(bool btn_iniciar) {
     pronto_iniciar = false;
 
     // Atualiza display informando que novo ciclo pode ser iniciado
-    atualizar_t0("Clique iniciar para novo ciclo");
-    atualizar_t1("Aguardando comando...");
+    atualizar_t0("Sistema pronto para nova pipetagem");
+    atualizar_t1("Clique em iniciar ciclo");
+    atualizar_t2("Aguardando comando...");
 }
