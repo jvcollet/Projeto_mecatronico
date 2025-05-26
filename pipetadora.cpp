@@ -2,7 +2,7 @@
 #include "mbed.h"
 #include "pipetadora.h"
 
-DigitalOut rele_pipeta(PA_6); // Pino que aciona a pipeta (rele)
+DigitalOut rele_pipeta(PA_9); // Pino que aciona a pipeta (rele)
 
 void inicializar_pipetadora() {
     rele_pipeta = 0; // Desliga pipeta inicialmente

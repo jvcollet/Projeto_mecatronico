@@ -2,6 +2,8 @@
 #include "movimento.h"
 #include "referenciamento.h"
 #include "nextion_interface.h"
+#include "emergencia.h"
+
 
 // --- Saídas dos drivers X, Y e Z ---
 extern DigitalOut DIR_X;
@@ -10,6 +12,7 @@ extern DigitalOut ENABLE_X;
 extern DigitalOut DIR_Y;
 extern DigitalOut CLK_Y;
 extern DigitalOut ENABLE_Y;
+
 // Usamos MP3 como saída para Z (IN1..IN4)
 extern BusOut    MP3;
 
@@ -28,10 +31,11 @@ extern int z_posicao;
 
 #define VELO_HOMING    200   // meio período de pulso (us)
 #define VELO_HOMING_Z    3000   // meio período de pulso (us)
-int x_posicao_max = 60000;
-int y_posicao_max = 60000;
-int z_posicao_max = -1200; // ajuste conforme necessidade
+int x_posicao_max = 5000;
+int y_posicao_max = 5000;
+int z_posicao_max = -1225; // ajuste conforme necessidade
 static const uint8_t STEP_PATTERN[4] = {1<<0, 1<<1, 1<<2, 1<<3};
+ 
 
 // --- Função de pulso para X e Y ---
 static void pulso_step(DigitalOut &CLK) {
@@ -111,27 +115,28 @@ static volatile bool zNextionDown = false;
 void movimento_manual(int x_joystick, int y_joystick, bool manual) {
     if (!manual) return;
 
-    if (!joystickTickerStarted) {
-        tickerX.attach_us(&pulso_joystick_X, 500);
-        tickerY.attach_us(&pulso_joystick_Y, 500);
-        joystickTickerStarted = true;
-    }
+ if (!joystickTickerStarted) {
+    tickerX.attach_us(&pulso_joystick_X, 450);
+    tickerY.attach_us(&pulso_joystick_Y, 450);
+    joystickTickerStarted = true;
+
+}
 
     // X via joystick
-    if (x_joystick < 400 && x_posicao < 0) {
+    if (x_joystick < 400 && x_posicao < 0 && xMin.read() == 1) {
         joystickMoveX = true;
         joystickDirX = 1;
-    } else if (x_joystick > 600 && x_posicao < x_posicao_max) {
+    } else if (x_joystick > 600 && x_posicao < x_posicao_max && xMax.read() == 1) {
         joystickMoveX = true;
         joystickDirX = 0;
     } else {
         joystickMoveX = false;
     }
     // Y via joystick
-    if (y_joystick > 600 && y_posicao < y_posicao_max) {
+    if (y_joystick > 600 && y_posicao < y_posicao_max && yMin.read() == 1) {
         joystickMoveY = true;
         joystickDirY = 1;
-    } else if (y_joystick < 400 && y_posicao < 0) {
+    } else if (y_joystick < 400 && y_posicao < 0 && yMax.read() == 1) {
         joystickMoveY = true;
         joystickDirY = 0;
     } else {
@@ -154,4 +159,3 @@ else if (zUp && zMin.read() == 1 && z_posicao <= 0) {
     zUp = false;          // limpa o flag
     }
 }
-// // && z_posicao <= 0

@@ -2,6 +2,8 @@
 #include "referenciamento.h"
 #include "nextion_interface.h"
 #include "movimento.h"
+#include "emergencia.h"
+
 
 // Funções de passo
 extern void step_x(int direction, int &pos);
@@ -15,7 +17,7 @@ extern int       x_posicao, y_posicao, z_posicao;
 #define BACKOFF_STEPS   2000
 #define STEP_DELAY_US   200
 #define WAIT_BACKOFF_MS 500
-#define BACKOFF_STEPS_Z   150
+#define BACKOFF_STEPS_Z   50
 
 
 Timer timer_x;
@@ -31,6 +33,8 @@ void referenciar() {
     timer_z.start();
 
     while (!(x_ref_ok && y_ref_ok && z_ref_ok)) {
+        checar_emergencia_com_reset();
+
         // — EIXO X —
         if (!x_ref_ok && z_ref_ok) {
             if (!x_backoff_pending) {

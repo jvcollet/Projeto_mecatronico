@@ -5,10 +5,9 @@
 #include "controle_posicoes.h"
 #include "nextion_interface.h"
 #include "pipetadora.h"
+#include "emergencia.h"
 
-// Reinicialização automática após energização (apenas uma vez)
-#define BOOT_FLAG_MAGIC 0xDEADBEEF
-volatile uint32_t *boot_flag = (uint32_t *)0x2001FFF0;  // endereço livre na SRAM
+
 
 // Drivers de passo para X e Y
 DigitalOut DIR_X(PB_10);
@@ -39,6 +38,9 @@ int x_posicao = 0;
 int y_posicao = 0;
 int z_posicao = 0;
 
+int xv = 500;
+int yv = 500; 
+
 // Controles adicionais
 DigitalOut Led(LED1);
 DigitalIn  botao(PC_13);
@@ -51,7 +53,7 @@ DigitalIn emergencia(PC_7);
 
 //Acionamento pipeta
 DigitalIn mybutton(USER_BUTTON);
-DigitalOut pipetadora(PA_6); // Rele
+DigitalOut pipetadora(PA_9); // Rele
 
 // Comunicacao com Nextion (declarado em nextion_interface.cpp)
 extern Serial nextion;
@@ -68,14 +70,7 @@ extern bool coleta_salva;
 
 
 int main() {
-        // --- Reinicialização automática no primeiro boot ---
-    if (*boot_flag != BOOT_FLAG_MAGIC) {
-        *boot_flag = BOOT_FLAG_MAGIC;
-        wait_ms(200);              // tempo para periféricos estabilizarem
-        NVIC_SystemReset();        // reinicia a placa
-    }
-    *boot_flag = 0;  // limpa flag para não entrar em loop
-
+    
     iniciar_nextion();
     inicializar_pipetadora();
     
@@ -89,38 +84,27 @@ int main() {
     // Mensagens iniciais
     atualizar_t0("Clique no botao de referenciar");
     atualizar_t1("Sistema iniciado");
-    atualizar_t2("Posicoes ainda nao refernciadas");
+    atualizar_t2("Posicoes ainda nao referenciadas");
 
     bool modo_manual = true; 
 
+    inicializar_pipetadora();
+
+
     while (true) {
         // Verifica emergência (botão ativo baixo)
-        if (emergencia.read() == 0) {
-            // Para todo movimento e exibe alerta
-            atualizar_t0("!!! EMERGÊNCIA !!!");
-            atualizar_t1("Sistema parado - reiniciando...");
-            ENABLE_X = 1;
-            ENABLE_Y = 1;
-            MP3 = 0;
-            buzzer = 1;
+        checar_emergencia_com_reset();
 
-            // Pequena espera para o usuário ver a mensagem
-            wait_ms(10000);  
-
-            // Reinicia o sistema
-            NVIC_SystemReset();
-        }
-       
         botao_referenciamento(referenciar_sistema);
 
-        int xv = xAxis.read() * 1000;
-        int yv = yAxis.read() * 1000;
+        xv = xAxis.read() * 1000;
+        yv = yAxis.read() * 1000;
 
         movimento_manual(xv, yv, modo_manual);
  
         
         if (referenciar_sistema) {
-            atualizar_t0("Aguarde o refernciamento");
+            atualizar_t0("Aguarde o referenciamento");
             atualizar_t1("Referenciando...");
             referenciar();
 
